@@ -1,0 +1,5 @@
+{
+  "name": "MatchFind MVP",
+  "description": "A serverless match-finder MVP application using React, Tailwind CSS, and Supabase for authentication and data storage.",
+  "requestFramePermissions": []
+}
