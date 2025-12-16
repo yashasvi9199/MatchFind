@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { UserProfile, FilterState } from '../../types';
 import { getPotentialMatches, recordInteraction } from '../../services/matchService';
-import { Input, Select, Label } from '../common/FormComponents';
+import { Select, Label } from '../common/FormComponents';
 import { CASTES, SKINS, GOTRA_MAP } from '../../constants/data';
 import PublicProfileModal from './PublicProfileModal';
 import { Heart, X as XIcon, Filter } from 'lucide-react';
@@ -27,9 +27,11 @@ export default function RishteyView({ currentUser }: Props) {
 
   useEffect(() => {
     // Load potential matches on mount
-    const potentials = getPotentialMatches(currentUser.id, currentUser.gender);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProfiles(potentials);
+    const fetchPotentials = async () => {
+        const potentials = await getPotentialMatches(currentUser.id, currentUser.gender);
+        setProfiles(potentials);
+    };
+    fetchPotentials();
   }, [currentUser.id, currentUser.gender]);
 
   // Apply filters
@@ -96,14 +98,14 @@ export default function RishteyView({ currentUser }: Props) {
             </div>
             <div>
                 <Label>Siblings</Label>
-                <Select value={filters.siblings} onChange={e => setFilters({...filters, siblings: e.target.value as any})}>
+                <Select value={filters.siblings} onChange={e => setFilters({...filters, siblings: e.target.value as 'any' | 'none'})}>
                     <option value="any">Any</option>
                     <option value="none">No Siblings</option>
                 </Select>
             </div>
             <div>
                 <Label>Health Issues</Label>
-                <Select value={filters.healthIssues} onChange={e => setFilters({...filters, healthIssues: e.target.value as any})}>
+                <Select value={filters.healthIssues} onChange={e => setFilters({...filters, healthIssues: e.target.value as 'any' | 'none'})}>
                     <option value="any">Any</option>
                     <option value="none">None</option>
                 </Select>
