@@ -16,11 +16,13 @@ export default function MatchView({ currentUser }: Props) {
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
     // Refresh data when tab changes
-    if (activeTab === 'LIKED') setData(getYouLiked(currentUser.id));
-    if (activeTab === 'LIKED_BY') setData(getWhoLikedYou(currentUser.id));
-    if (activeTab === 'MATCHES') setData(getMutualMatches(currentUser.id));
+    const loadData = async () => {
+        if (activeTab === 'LIKED') setData(await getYouLiked(currentUser.id));
+        if (activeTab === 'LIKED_BY') setData(await getWhoLikedYou(currentUser.id));
+        if (activeTab === 'MATCHES') setData(await getMutualMatches(currentUser.id));
+    };
+    loadData();
   }, [activeTab, currentUser.id]);
 
   const renderCard = (profile: UserProfile) => {
