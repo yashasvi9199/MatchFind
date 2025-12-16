@@ -1,4 +1,4 @@
-import React, { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
+import { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
 
 // --- Styled Label ---
 interface LabelProps {
@@ -15,7 +15,7 @@ export function Label({ children, className = '' }: LabelProps) {
 }
 
 // --- Styled Input ---
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
+type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export function Input(props: InputProps) {
   return (
@@ -27,7 +27,7 @@ export function Input(props: InputProps) {
 }
 
 // --- Styled Select ---
-interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {}
+type SelectProps = SelectHTMLAttributes<HTMLSelectElement>;
 
 export function Select(props: SelectProps) {
   return (

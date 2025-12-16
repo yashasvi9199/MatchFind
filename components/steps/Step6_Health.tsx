@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ProfileData } from '../../types';
 import { Input, Label, SectionTitle } from '../common/FormComponents';
 import { X, CheckCircle2 } from 'lucide-react';
@@ -12,7 +12,7 @@ export default function Step6_Health({ data, setHealthIssues }: Props) {
   const [newHealthIssue, setNewHealthIssue] = useState('');
 
   const addHealthIssue = () => {
-    let issue = newHealthIssue.trim().replace(/\s+/g, ' '); // Trim additional spaces
+    const issue = newHealthIssue.trim().replace(/\s+/g, ' '); // Trim additional spaces
     if (issue) {
         // Limit to 3 words
         const words = issue.split(' ');

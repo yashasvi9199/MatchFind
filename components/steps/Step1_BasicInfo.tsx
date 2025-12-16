@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { ProfileData } from '../../types';
-import { TITLES, SKINS, BLOOD_GROUPS, DIETS } from '../../constants/data';
+import { TITLES, SKINS, DIETS } from '../../constants/data';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';
 
 interface Props {
@@ -10,21 +10,18 @@ interface Props {
 
 export default function Step1_BasicInfo({ data, update }: Props) {
   // Local state for split names
-  const [nameParts, setNameParts] = useState({ first: '', middle: '', last: '' });
-
-  useEffect(() => {
-    // Initialize split names from data.name
-    const parts = data.name.split(' ');
+  const [nameParts, setNameParts] = useState(() => {
+    const parts = data.name ? data.name.split(' ') : [];
     if (parts.length > 0) {
         const first = parts[0] || '';
         const last = parts.length > 1 ? parts[parts.length - 1] : '';
         const middle = parts.length > 2 ? parts.slice(1, -1).join(' ') : '';
-        // Only set if different to avoid loop or overwrite on typing
-        if(!nameParts.first && !nameParts.last) {
-            setNameParts({ first, middle, last });
-        }
+        return { first, middle, last };
     }
-  }, []); // Run once on mount
+    return { first: '', middle: '', last: '' };
+  });
+
+  // useEffect removed as state is now initialized lazily
 
   const handleNameInput = (field: 'first' | 'middle' | 'last', val: string) => {
     // 1. Alphabets and space only
@@ -44,7 +41,7 @@ export default function Step1_BasicInfo({ data, update }: Props) {
       setNameParts(prev => ({ ...prev, [field]: prev[field].trim() }));
   };
 
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHeightChange = (e: ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value;
     const oldVal = data.height || '';
 
@@ -64,7 +61,7 @@ export default function Step1_BasicInfo({ data, update }: Props) {
     }
   };
 
-  const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWeightChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (/^\d{0,3}$/.test(val)) {
         update('weight', val);

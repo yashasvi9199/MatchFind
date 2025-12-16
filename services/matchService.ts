@@ -34,7 +34,7 @@ export const recordInteraction = (fromUserId: string, toUserId: string, type: 'I
 export const getPotentialMatches = (currentUserId: string, gender: 'Male' | 'Female'): UserProfile[] => {
   // 1. Get all profiles of opposite gender
   const oppositeGender = gender === 'Male' ? 'Female' : 'Male';
-  let potentials = MOCK_PROFILES.filter(p => p.gender === oppositeGender);
+  const potentials = MOCK_PROFILES.filter(p => p.gender === oppositeGender);
 
   // 2. Filter out profiles current user has already acted on (Interested or Removed)
   const interactions = getInteractions();

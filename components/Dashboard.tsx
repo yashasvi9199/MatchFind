@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { uploadProfileImage, createProfile } from '../services/supabaseService';
 import { ProfileData, FamilyMember, AppView, UserProfile } from '../types';
 import { STEPS } from '../constants/data';
@@ -30,8 +30,8 @@ const INITIAL_FAMILY_MEMBER: FamilyMember = {
 };
 
 const INITIAL_STATE: ProfileData = {
-  title: 'Mr', name: '', gender: '' as any, age: 18, height: '', weight: '',
-  skinColor: '', bloodGroup: '', diet: '' as any, bio: '',
+  title: 'Mr', name: '', gender: 'Male', age: 18, height: '', weight: '',
+  skinColor: '', bloodGroup: '', diet: 'Vegetarian', bio: '',
   caste: '', gotra: '',
   birthPlace: '', birthTime: '12:00', 
   nativeCountry: 'India', nativeState: '', nativeCity: '',
@@ -272,9 +272,10 @@ export default function Dashboard({ user }: DashboardProps) {
       setIsEditingProfile(false);
       setCurrentView('PROFILE');
       window.scrollTo(0, 0);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      setErrors([{ field: 'submit', message: error.message || 'Failed to save profile' }]);
+      const msg = error instanceof Error ? error.message : 'Failed to save profile';
+      setErrors([{ field: 'submit', message: msg }]);
     } finally {
       setIsSaving(false);
     }

@@ -1,4 +1,4 @@
-import { UserProfile, ProfileData, FamilyMember } from '../types';
+import { UserProfile, FamilyMember } from '../types';
 
 // Helper to generate UUID
 const uuid = () => Math.random().toString(36).substring(2) + Date.now().toString(36);

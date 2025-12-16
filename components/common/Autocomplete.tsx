@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import { Label } from './FormComponents';
 
@@ -46,7 +46,7 @@ export default function Autocomplete({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setFilter(val);
         onChange(val);

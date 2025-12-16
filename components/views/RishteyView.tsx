@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { UserProfile, FilterState } from '../../types';
 import { getPotentialMatches, recordInteraction } from '../../services/matchService';
 import { Input, Select, Label } from '../common/FormComponents';
@@ -21,7 +21,6 @@ const INITIAL_FILTERS: FilterState = {
 
 export default function RishteyView({ currentUser }: Props) {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
-  const [filteredProfiles, setFilteredProfiles] = useState<UserProfile[]>([]);
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -29,12 +28,12 @@ export default function RishteyView({ currentUser }: Props) {
   useEffect(() => {
     // Load potential matches on mount
     const potentials = getPotentialMatches(currentUser.id, currentUser.gender);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfiles(potentials);
-    setFilteredProfiles(potentials);
-  }, [currentUser]);
+  }, [currentUser.id, currentUser.gender]);
 
   // Apply filters
-  useEffect(() => {
+  const filteredProfiles = useMemo(() => {
     let result = profiles;
 
     if (filters.caste) result = result.filter(p => p.caste === filters.caste);
@@ -44,8 +43,8 @@ export default function RishteyView({ currentUser }: Props) {
     if (filters.siblings === 'none') result = result.filter(p => p.siblings.length === 0);
     if (filters.healthIssues === 'none') result = result.filter(p => p.healthIssues.length === 0);
 
-    setFilteredProfiles(result);
-  }, [filters, profiles]);
+    return result;
+  }, [profiles, filters]);
 
   const handleAction = (targetProfile: UserProfile, type: 'INTERESTED' | 'REMOVED') => {
     console.log(`[Rishtey] Action ${type} on ${targetProfile.name}`);

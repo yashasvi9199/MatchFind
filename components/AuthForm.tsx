@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { supabase } from '../supabaseClient';
 import { AuthMode, LoginMethod } from '../types';
 import { Mail, KeyRound, Loader2, ArrowRight, Heart, Phone, Lock, Sparkles, Info } from 'lucide-react';
@@ -39,7 +39,7 @@ export default function AuthForm() {
     }
   };
 
-  const handleAction = async (e: React.FormEvent) => {
+  const handleAction = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);

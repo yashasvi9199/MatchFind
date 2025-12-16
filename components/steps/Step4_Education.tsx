@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ProfileData } from '../../types';
 import { EDUCATION_LEVELS, EDUCATION_STREAMS, SALARY_SLABS } from '../../constants/data';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';

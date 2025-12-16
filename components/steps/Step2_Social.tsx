@@ -1,5 +1,5 @@
 
-import React from 'react';
+
 import { ProfileData } from '../../types';
 import { CASTES, GOTRA_MAP } from '../../constants/data';
 import { SectionTitle } from '../common/FormComponents';

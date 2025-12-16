@@ -19,7 +19,8 @@
     "noEmit": true,
     "baseUrl": ".",
     "strict": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "include": [".", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist"]

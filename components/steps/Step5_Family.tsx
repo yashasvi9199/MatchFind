@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { ProfileData, FamilyMember } from '../../types';
 import { TITLES, CASTES, GOTRA_MAP } from '../../constants/data';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';

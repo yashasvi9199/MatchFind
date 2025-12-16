@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ProfileData } from '../../types';
 import { User as UserIcon, MapPin, Calendar, Heart } from 'lucide-react';
 

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { UserProfile } from '../../types';
 import { getYouLiked, getWhoLikedYou, getMutualMatches } from '../../services/matchService';
 import PublicProfileModal from './PublicProfileModal';
-import { Heart, UserCheck, ArrowRight, Stars } from 'lucide-react';
+import { Heart, ArrowRight, Stars } from 'lucide-react';
 
 interface Props {
   currentUser: UserProfile;
@@ -16,11 +16,12 @@ export default function MatchView({ currentUser }: Props) {
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     // Refresh data when tab changes
     if (activeTab === 'LIKED') setData(getYouLiked(currentUser.id));
     if (activeTab === 'LIKED_BY') setData(getWhoLikedYou(currentUser.id));
     if (activeTab === 'MATCHES') setData(getMutualMatches(currentUser.id));
-  }, [activeTab, currentUser]);
+  }, [activeTab, currentUser.id]);
 
   const renderCard = (profile: UserProfile) => {
     if (activeTab === 'MATCHES') {
@@ -84,7 +85,14 @@ export default function MatchView({ currentUser }: Props) {
   );
 }
 
-const TabButton = ({ active, onClick, label, icon }: any) => (
+interface TabButtonProps {
+    active: boolean;
+    onClick: () => void;
+    label: string;
+    icon: ReactNode;
+}
+
+const TabButton = ({ active, onClick, label, icon }: TabButtonProps) => (
     <button 
       onClick={onClick}
       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${active ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}

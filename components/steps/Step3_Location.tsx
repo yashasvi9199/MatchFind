@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ProfileData } from '../../types';
 import { INDIAN_STATES } from '../../constants/data';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';
@@ -21,7 +21,7 @@ export default function Step3_Location({ data, update }: Props) {
       update('currentState', data.nativeState);
       update('currentCity', data.nativeCity);
     }
-  }, [sameAsNative, data.nativeCountry, data.nativeState, data.nativeCity]); 
+  }, [sameAsNative, data.nativeCountry, data.nativeState, data.nativeCity, update]); 
 
   const isIndiaNative = data.nativeCountry === 'India';
   const isIndiaCurrent = data.currentCountry === 'India';

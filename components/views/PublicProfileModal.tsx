@@ -1,6 +1,6 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { UserProfile } from '../../types';
-import { X, Heart, ThumbsDown, User as UserIcon, Briefcase, MapPin, CheckCircle2 } from 'lucide-react';
+import { X, Heart, ThumbsDown, Briefcase, MapPin, CheckCircle2 } from 'lucide-react';
 
 interface Props {
   profile: UserProfile;
@@ -152,7 +152,7 @@ export default function PublicProfileModal({ profile, onClose, onAction, isMatch
   );
 }
 
-const Badge = ({ children, color }: { children: React.ReactNode, color: string }) => {
+const Badge = ({ children, color }: { children: ReactNode, color: string }) => {
     const colorClasses: Record<string, string> = {
         rose: 'bg-rose-50 text-rose-700 border-rose-100',
         blue: 'bg-blue-50 text-blue-700 border-blue-100',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AppView } from '../../types';
 import { User, Users, Search, HeartHandshake, Menu, X } from 'lucide-react';
 
@@ -9,6 +9,9 @@ interface Props {
 
 export default function FloatingNav({ currentView, setView }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Helper to check if active
+  const isActive = (view: AppView) => currentView === view;
 
   const toggleOpen = () => {
     console.log(`[FloatingNav] Toggling Menu: ${!isOpen}`);
@@ -32,21 +35,24 @@ export default function FloatingNav({ currentView, setView }: Props) {
     <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3">
       {/* Menu Items Stack */}
       <div className={`flex flex-col gap-3 transition-all duration-300 ease-out origin-bottom ${isOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-50 pointer-events-none'}`}>
-        {menuItems.map((item, index) => (
-          <button
-            key={item.id}
-            onClick={() => handleNav(item.id as AppView)}
-            className={`flex items-center justify-end gap-3 group transition-transform duration-300`}
-            style={{ transitionDelay: `${index * 50}ms` }}
-          >
-            <span className="bg-white text-gray-700 text-xs font-bold px-2 py-1 rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              {item.label}
-            </span>
-            <div className={`${item.color} text-white p-3 rounded-full shadow-lg hover:scale-110 transition-transform`}>
-              {item.icon}
-            </div>
-          </button>
-        ))}
+        {menuItems.map((item, index) => {
+          const active = isActive(item.id as AppView);
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNav(item.id as AppView)}
+              className={`flex items-center justify-end gap-3 group transition-transform duration-300 ${active ? 'scale-110 mr-2' : ''}`}
+              style={{ transitionDelay: `${index * 50}ms` }}
+            >
+              <span className={`bg-white text-gray-700 text-xs font-bold px-2 py-1 rounded-md shadow-md transition-opacity whitespace-nowrap ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                {item.label}
+              </span>
+              <div className={`${item.color} text-white p-3 rounded-full shadow-lg hover:scale-110 transition-transform ${active ? 'ring-4 ring-white ring-opacity-50' : ''}`}>
+                {item.icon}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Main Toggle Button */}

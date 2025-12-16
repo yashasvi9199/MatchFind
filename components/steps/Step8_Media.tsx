@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef, ChangeEvent } from 'react';
 import { ProfileData } from '../../types';
 import { Label, SectionTitle } from '../common/FormComponents';
 import { Upload, Users, ExternalLink } from 'lucide-react';
@@ -13,7 +13,7 @@ interface Props {
 export default function Step8_Media({ data, update, avatarFile, setAvatarFile }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       console.log(`[Media] File selected: ${e.target.files[0].name}`);
       setAvatarFile(e.target.files[0]);

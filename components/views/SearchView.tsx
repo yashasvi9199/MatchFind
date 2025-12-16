@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { UserProfile } from '../../types';
 import { MOCK_PROFILES } from '../../constants/mockProfiles';
 import { Input, Label } from '../common/FormComponents';
@@ -16,7 +16,7 @@ export default function SearchView() {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     setIsSearching(true);
     
