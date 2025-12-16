@@ -15,18 +15,15 @@ const CoupleAnimation = () => {
     let height = canvas.height;
     
     // Configuration
-    const particleCount = 180; // Slight increase for better shape definition
+    const particleCount = 600; // High density for clear silhouette without lines
     const connectionDistanceFloat = 100;
-    const connectionDistanceFormed = 25; // Drastically reduced to prevent "blur"
-    const floatSpeed = 0.5;
-    const disperseSpeed = 2.0;
-    const convergeSpeed = 0.05;
+    const floatSpeed = 0.6;
+    const convergeSpeed = 0.06;
     
     // Animation Cycle State
     // 0: Floating (Chaos)
     // 1: Converging (Forming)
-    // 2: Formed (Holding - Bride & Groom)
-    // 3: Dispersing (Exploding)
+    // 2: Formed (Holding - Bride & Groom) - FINAL STATE
     let state = 0; 
     let stateTimer = 0;
 
@@ -37,6 +34,7 @@ const CoupleAnimation = () => {
       vy: number;
       targetX: number;
       targetY: number;
+      color?: string; // Optional: differentiate particles
     }
 
     const particles: Point[] = [];
@@ -50,8 +48,8 @@ const CoupleAnimation = () => {
           y: Math.random() * height,
           vx: (Math.random() - 0.5) * floatSpeed,
           vy: (Math.random() - 0.5) * floatSpeed,
-          targetX: 0,
-          targetY: 0
+          targetX: width / 2, 
+          targetY: height / 2
         });
       }
       calculateTargets();
@@ -61,9 +59,9 @@ const CoupleAnimation = () => {
     const calculateTargets = () => {
         const cx = width / 2;
         const cy = height / 2;
-        const scale = Math.min(width, height) * 0.0035; 
+        // Adjusted scale for better visibility on standard screens
+        const outputScale = Math.min(width, height) / 500; 
 
-        // Helper to add target points
         let pIndex = 0;
         const setTarget = (x: number, y: number) => {
             if (pIndex < particles.length) {
@@ -73,72 +71,78 @@ const CoupleAnimation = () => {
             }
         };
 
-        const groomOffset = 60 * scale * 40;
-        const brideOffset = 60 * scale * 40;
+        const groomOffset = 60 * outputScale; 
+        const brideOffset = 60 * outputScale;
+        const centerYOffset = 0; // Centered vertically
 
-        // --- Groom (Left) ---
+        // === GROOM (Left) ===
         const gx = cx - groomOffset;
-        const gy = cy - 60 * scale * 40;
-        const headRadius = 25 * scale * 40;
+        const gy = cy - 80 * outputScale + centerYOffset; // Head center
+        const headRadius = 22 * outputScale;
         
-        // Head (Circle)
-        for (let i = 0; i < 30; i++) {
-            const angle = (i / 30) * Math.PI * 2;
-            setTarget(gx + Math.cos(angle) * headRadius, gy + Math.sin(angle) * headRadius);
+        // 1. Groom Head (Outline + Fill) - Circle
+        for (let i = 0; i < 40; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.sqrt(Math.random()) * headRadius; // Uniform distribution within circle
+            setTarget(gx + Math.cos(angle) * r, gy + Math.sin(angle) * r);
         }
 
-        // Body (Simple Suit Shape)
+        // 2. Groom Body (Rectangular Suit)
         const bodyTop = gy + headRadius;
-        const bodyHeight = 110 * scale * 40;
-        const shoulderWidth = 70 * scale * 40;
+        const bodyHeight = 140 * outputScale;
+        const shoulderWidth = 70 * outputScale;
         
-        // Shoulders & Body Outline
-        for (let i = 0; i < 12; i++) setTarget(gx - shoulderWidth/2 + (i/12)*shoulderWidth, bodyTop + 5);
-        for (let i = 0; i < 18; i++) setTarget(gx - shoulderWidth/2, bodyTop + (i/18)*bodyHeight);
-        for (let i = 0; i < 18; i++) setTarget(gx + shoulderWidth/2, bodyTop + (i/18)*bodyHeight);
-        // Legs / Bottom
-        for (let i = 0; i < 12; i++) setTarget(gx - shoulderWidth/2 + (i/12)*shoulderWidth, bodyTop + bodyHeight);
-        
-        // Inner detail (Tie/Buttons - vertical line)
-        for (let i = 0; i < 8; i++) setTarget(gx, bodyTop + 10 + (i/8)*(bodyHeight/2));
+        // Shoulders/Torso Area fill
+        for (let i = 0; i < 180; i++) {
+             // Random point in rectangle roughly representing torso/legs
+             const px = gx + (Math.random() - 0.5) * shoulderWidth;
+             const py = bodyTop + Math.random() * bodyHeight;
+             
+             // Shaping: taper slightly for legs? 
+             // Simple Box is fine for abstract style
+             setTarget(px, py);
+        }
 
-
-        // --- Bride (Right) ---
+        // === BRIDE (Right) ===
         const bx = cx + brideOffset;
-        const by = cy - 50 * scale * 40;
+        const by = cy - 80 * outputScale + centerYOffset;
         
-        // Head
-        for (let i = 0; i < 30; i++) {
-            const angle = (i / 30) * Math.PI * 2;
-            setTarget(bx + Math.cos(angle) * headRadius, by + Math.sin(angle) * headRadius);
+        // 1. Bride Head
+        for (let i = 0; i < 40; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.sqrt(Math.random()) * headRadius;
+            setTarget(bx + Math.cos(angle) * r, by + Math.sin(angle) * r);
         }
 
-        // Dress (Gown Shape)
+        // 2. Bride Dress (Triangle/A-Line)
         const dressTop = by + headRadius;
-        const dressHeight = 120 * scale * 40;
-        const dressBottomWidth = 110 * scale * 40;
-        const waistWidth = 40 * scale * 40;
+        const dressHeight = 140 * outputScale;
+        const dressBottomWidth = 120 * outputScale;
+        const waistWidth = 30 * outputScale;
 
-        // Waist
-        for (let i = 0; i < 8; i++) setTarget(bx - waistWidth/2 + (i/8)*waistWidth, dressTop + 10);
+        // Dress Fill
+        for (let i = 0; i < 240; i++) {
+            // Triangle logic
+            // random height factor 0..1
+            const h = Math.random();
+            const currentWidth = waistWidth + (dressBottomWidth - waistWidth) * h;
+            
+            const px = bx + (Math.random() - 0.5) * currentWidth;
+            const py = dressTop + h * dressHeight;
+            setTarget(px, py);
+        }
 
-        // Sides of dress (A-Frame)
-        for (let i = 0; i < 20; i++) {
-             // Left slope
-             setTarget(bx - waistWidth/2 - (i/20) * (dressBottomWidth/2 - waistWidth/2), dressTop + 10 + (i/20) * dressHeight);
-             // Right slope
-             setTarget(bx + waistWidth/2 + (i/20) * (dressBottomWidth/2 - waistWidth/2), dressTop + 10 + (i/20) * dressHeight);
-        }
-        // Bottom of dress
-        for (let i = 0; i < 15; i++) {
-           setTarget(bx - dressBottomWidth/2 + (i/15)*dressBottomWidth, dressTop + 10 + dressHeight);
-        }
-        
-        // Scramble remaining unused particles to center or let them float near
+        // Use any remaining particles to reinforce the outlines or center
         while(pIndex < particles.length) {
-            // Just attach them to the bottom of the dress or random outline points to thicken
-            particles[pIndex].targetX = bx + (Math.random()-0.5)*dressBottomWidth;
-            particles[pIndex].targetY = dressTop + dressHeight + (Math.random())*20;
+            // Add to heart/center area between them?
+            // Or just reinforce the bodies
+            if (Math.random() > 0.5) {
+                // Reinforce Bride Dress Bottom
+                setTarget(bx + (Math.random()-0.5)*dressBottomWidth, dressTop + dressHeight - Math.random()*10);
+            } else {
+                // Reinforce Groom Shoulders
+                setTarget(gx + (Math.random()-0.5)*shoulderWidth, bodyTop + Math.random()*20);
+            }
             pIndex++;
         }
     };
@@ -165,16 +169,11 @@ const CoupleAnimation = () => {
       // State Machine
       stateTimer++;
 
-      // TIMINGS (Simulating 60fps)
-      // 0: Float (0-4s) -> 240 frames
-      // 1: Converge (4-8s) -> 240 frames
-      // 2: Formed (8-13s) -> 300 frames
-      // 3: Disperse (13s-14s) -> 60 frames
-      
-      const TIME_FLOAT = 240;
-      const TIME_CONVERGE = 140; // Quick snap
-      const TIME_FORMED = 300;   // Hold for 5 sec
-      const TIME_DISPERSE = 60;  // Quick explode
+      // Timing Constants (60fps)
+      // Float: 25 Seconds
+      // Converge: 3 Seconds
+      const TIME_FLOAT = 25 * 60; 
+      const TIME_CONVERGE = 3 * 60; 
 
       if (state === 0 && stateTimer > TIME_FLOAT) {
           state = 1;
@@ -182,37 +181,10 @@ const CoupleAnimation = () => {
       } else if (state === 1 && stateTimer > TIME_CONVERGE) {
           state = 2; // Fully formed
           stateTimer = 0;
-      } else if (state === 2 && stateTimer > TIME_FORMED) {
-          state = 3;
-          stateTimer = 0;
-          // Assign explosive velocities for dispersal
-          particles.forEach(p => {
-              const angle = Math.random() * Math.PI * 2;
-              const force = Math.random() * disperseSpeed + 1;
-              p.vx = Math.cos(angle) * force;
-              p.vy = Math.sin(angle) * force;
-          });
-      } else if (state === 3 && stateTimer > TIME_DISPERSE) {
-          state = 0;
-          stateTimer = 0;
-          // Calm down velocities
-          particles.forEach(p => {
-            p.vx = (Math.random() - 0.5) * floatSpeed;
-            p.vy = (Math.random() - 0.5) * floatSpeed;
-          });
       }
 
-      // Drawing Config based on State
-      let currentConnDist = connectionDistanceFloat;
-      let lineAlpha = 0.2; // Default faint line
-
-      if (state === 2) {
-          currentConnDist = connectionDistanceFormed; // Reduce to fix blur
-          lineAlpha = 0.15; // Even fainter lines in formed state
-      }
-
-      ctx.fillStyle = state === 2 ? '#be123c' : '#e11d48'; // Darker rose when formed
-      ctx.strokeStyle = `rgba(225, 29, 72, ${lineAlpha})`;
+      ctx.fillStyle = state === 2 ? '#e11d48' : '#fb7185'; // Rose-600 vs Rose-400
+      ctx.strokeStyle = `rgba(225, 29, 72, 0.3)`;
 
       // Update & Draw
       particles.forEach(p => {
@@ -226,43 +198,36 @@ const CoupleAnimation = () => {
               if (p.y < 0 || p.y > height) p.vy *= -1;
           } 
           else if (state === 1) {
-              // Converging (Ease out)
+              // Converging
               p.x += (p.targetX - p.x) * convergeSpeed;
               p.y += (p.targetY - p.y) * convergeSpeed;
           } 
           else if (state === 2) {
-              // Formed (Micro jitter to keep it alive)
-              const jitter = 0.3;
-              p.x = p.targetX + (Math.random() - 0.5) * jitter;
-              p.y = p.targetY + (Math.random() - 0.5) * jitter;
-          } 
-          else if (state === 3) {
-              // Dispersing
-              p.x += p.vx;
-              p.y += p.vy;
+              // Formed - Lock exact position
+              p.x = p.targetX;
+              p.y = p.targetY;
           }
 
           // Draw Point
           ctx.beginPath();
-          // Make dots slightly smaller in formed state to be sharper
-          const r = state === 2 ? 1.5 : 2; 
+          // Adjust size: Smaller when floating for elegance, slightly larger when formed for solidity
+          const r = state === 2 ? 2.5 : 1.8; 
           ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
           ctx.fill();
       });
 
-      // Draw Connections (Optimized)
-      // Only draw lines if we are NOT dispersing (too chaotic) or if we are floating/formed
-      if (state !== 3) {
+      // Draw Connections (ONLY in float/converge)
+      if (state !== 2) {
           for (let i = 0; i < particles.length; i++) {
-              // Optimization: Don't check every pair against every pair if possible, 
-              // but for N=180 it's fine (~16k checks).
               for (let j = i + 1; j < particles.length; j++) {
                   const dx = particles[i].x - particles[j].x;
                   const dy = particles[i].y - particles[j].y;
-                  if (Math.abs(dx) > currentConnDist || Math.abs(dy) > currentConnDist) continue; // Pre-check box
+                  
+                  // Optimization
+                  if (Math.abs(dx) > connectionDistanceFloat || Math.abs(dy) > connectionDistanceFloat) continue; 
 
                   const dist = Math.sqrt(dx * dx + dy * dy);
-                  if (dist < currentConnDist) {
+                  if (dist < connectionDistanceFloat) {
                       ctx.beginPath();
                       ctx.moveTo(particles[i].x, particles[i].y);
                       ctx.lineTo(particles[j].x, particles[j].y);
@@ -285,10 +250,7 @@ const CoupleAnimation = () => {
 
   return (
     <div className="w-full h-full bg-rose-50 relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-10 right-10 w-32 h-32 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-32 h-32 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        {/* Removed blurred blobs to ensure clean appearance */}
         
         <canvas ref={canvasRef} className="absolute inset-0 z-10" />
         
