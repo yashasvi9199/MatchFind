@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { UserProfile } from '../../types';
-import { MOCK_PROFILES } from '../../constants/mockProfiles';
+
 import { Input, Label } from '../common/FormComponents';
 import PublicProfileModal from './PublicProfileModal';
 import { Search, Loader2 } from 'lucide-react';
@@ -16,14 +16,18 @@ export default function SearchView() {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
 
-  const handleSearch = (e: FormEvent) => {
+  const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     setIsSearching(true);
     
-    console.log('[Search] Query:', query);
-
-    setTimeout(() => {
-        const filtered = MOCK_PROFILES.filter(p => {
+    try {
+        // MVP: Fetch all potentials and filter client-side. 
+        // Real App: Should be a server-side search query
+        const allProfiles = await import('../../services/matchService').then(m => m.getPotentialMatches('search_dummy', 'Male')); // Fetching generic pool
+        // Ideally we pass current user gender to get opposites. But for 'Search Database' maybe allow all?
+        // Let's assume we search the same pool as RishteyView for consistency.
+        
+        const filtered = allProfiles.filter(p => {
             const matchesName = query.name ? p.name.toLowerCase().includes(query.name.toLowerCase()) : true;
             const matchesCaste = query.caste ? p.caste.toLowerCase().includes(query.caste.toLowerCase()) : true;
             const matchesGotra = query.gotra ? p.gotra.toLowerCase().includes(query.gotra.toLowerCase()) : true;
@@ -33,8 +37,11 @@ export default function SearchView() {
         });
         
         setResults(filtered);
+    } catch (err) {
+        console.error("Search failed", err);
+    } finally {
         setIsSearching(false);
-    }, 600); // Fake delay
+    }
   };
 
   return (
