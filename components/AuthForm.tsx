@@ -36,9 +36,10 @@ export default function AuthForm() {
         }
       });
       if (error) throw error;
-    } catch (err: any) {
+    } catch (err) {
       console.error('[Auth] Google Login failed:', err);
-      setError(err.message);
+      const message = err instanceof Error ? err.message : 'An error occurred during Google Login';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -81,9 +82,10 @@ export default function AuthForm() {
             }
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('[Auth] Error:', JSON.stringify(err, null, 2));
-      setError(err.message || 'Authentication failed');
+      const message = err instanceof Error ? err.message : 'Authentication failed';
+      setError(message);
     } finally {
       setLoading(false);
     }
