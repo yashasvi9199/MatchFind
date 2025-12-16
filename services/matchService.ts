@@ -1,136 +1,55 @@
 import { Interaction, UserProfile } from '../types';
-import { MOCK_PROFILES } from '../constants/mockProfiles';
 
-const STORAGE_KEY_INTERACTIONS = 'matchfind_interactions';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-// Helper to get local interactions
-const getInteractions = (): Interaction[] => {
-  const stored = localStorage.getItem(STORAGE_KEY_INTERACTIONS);
-  return stored ? JSON.parse(stored) : [];
+export const recordInteraction = async (fromUserId: string, toUserId: string, type: 'INTERESTED' | 'REMOVED') => {
+  try {
+    await fetch(`${API_URL}/api/interactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fromUserId, toUserId, type })
+    });
+  } catch (error) {
+    console.error('Failed to record interaction', error);
+  }
 };
 
-// Helper to save interactions
-const saveInteraction = (interactions: Interaction[]) => {
-  localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(interactions));
+export const getPotentialMatches = async (currentUserId: string, gender: 'Male' | 'Female'): Promise<UserProfile[]> => {
+  try {
+    const res = await fetch(`${API_URL}/api/matches/potential?userId=${currentUserId}&gender=${gender}`);
+    if (!res.ok) throw new Error('Failed to fetch');
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 };
 
-export const recordInteraction = (fromUserId: string, toUserId: string, type: 'INTERESTED' | 'REMOVED') => {
-  console.log(`[MatchService] Interaction: ${fromUserId} marked ${toUserId} as ${type}`);
-  const interactions = getInteractions();
-  
-  // Remove existing interaction if any (allow changing mind)
-  const filtered = interactions.filter(i => !(i.fromUserId === fromUserId && i.toUserId === toUserId));
-  
-  filtered.push({
-    fromUserId,
-    toUserId,
-    type,
-    timestamp: Date.now()
-  });
-  
-  saveInteraction(filtered);
+export const getYouLiked = async (currentUserId: string): Promise<UserProfile[]> => {
+    try {
+        const res = await fetch(`${API_URL}/api/matches/liked?userId=${currentUserId}`);
+        return await res.json();
+    } catch { return []; }
 };
 
-export const getPotentialMatches = (currentUserId: string, gender: 'Male' | 'Female'): UserProfile[] => {
-  // 1. Get all profiles of opposite gender
-  const oppositeGender = gender === 'Male' ? 'Female' : 'Male';
-  const potentials = MOCK_PROFILES.filter(p => p.gender === oppositeGender);
-
-  // 2. Filter out profiles current user has already acted on (Interested or Removed)
-  const interactions = getInteractions();
-  const actedUponIds = new Set(
-    interactions
-      .filter(i => i.fromUserId === currentUserId)
-      .map(i => i.toUserId)
-  );
-
-  return potentials.filter(p => !actedUponIds.has(p.id));
+export const getWhoLikedYou = async (currentUserId: string): Promise<UserProfile[]> => {
+    try {
+        const res = await fetch(`${API_URL}/api/matches/liked-by?userId=${currentUserId}`);
+        return await res.json();
+    } catch { return []; }
 };
 
-export const getYouLiked = (currentUserId: string): UserProfile[] => {
-  const interactions = getInteractions();
-  const likedIds = interactions
-    .filter(i => i.fromUserId === currentUserId && i.type === 'INTERESTED')
-    .map(i => i.toUserId);
-  
-  return MOCK_PROFILES.filter(p => likedIds.includes(p.id));
+export const getMutualMatches = async (currentUserId: string): Promise<UserProfile[]> => {
+    try {
+        const res = await fetch(`${API_URL}/api/matches/mutual?userId=${currentUserId}`);
+        return await res.json();
+    } catch { return []; }
 };
 
-export const getWhoLikedYou = (currentUserId: string): UserProfile[] => {
-  const interactions = getInteractions();
-  const likerIds = interactions
-    .filter(i => i.toUserId === currentUserId && i.type === 'INTERESTED')
-    .map(i => i.fromUserId);
-  
-  return MOCK_PROFILES.filter(p => likerIds.includes(p.id));
+// Seed is now server-side, but client might trigger it if we wanted to exposed it. 
+// For now, removing the client-side seed logic as it's no longer relevant to local storage.
+export const seedMockInteractions = async (_currentUserId: string, _gender: 'Male' | 'Female') => {
+   // No-op or call server to seed?
+   // User asked to move backend code.
+   console.log('Seed interactions is now updated to Backend API usage. You may call /api/seed on backend to populate data.');
 };
-
-export const getMutualMatches = (currentUserId: string): UserProfile[] => {
-  const interactions = getInteractions();
-  
-  // IDs the user liked
-  const userLikedIds = new Set(
-    interactions
-      .filter(i => i.fromUserId === currentUserId && i.type === 'INTERESTED')
-      .map(i => i.toUserId)
-  );
-
-  // IDs that liked the user
-  const likedByUserIds = new Set(
-    interactions
-      .filter(i => i.toUserId === currentUserId && i.type === 'INTERESTED')
-      .map(i => i.fromUserId)
-  );
-
-  // Intersection
-  const mutualIds = [...userLikedIds].filter(id => likedByUserIds.has(id));
-
-  return MOCK_PROFILES.filter(p => mutualIds.includes(p.id));
-};
-
-// Seed some initial likes for testing "Who Liked You" and "Match"
-export const seedMockInteractions = (currentUserId: string, gender: 'Male' | 'Female') => {
-    const existing = getInteractions();
-    if (existing.length > 0) return; // Only seed if empty
-
-    console.log('[MatchService] Seeding mock interactions for testing...');
-    const oppositeGenderProfiles = MOCK_PROFILES.filter(p => p.gender !== gender);
-    
-    const newInteractions: Interaction[] = [];
-
-    // 1. Seed "Who Liked You" (People liking current user)
-    if(oppositeGenderProfiles.length > 0) {
-        newInteractions.push({
-            fromUserId: oppositeGenderProfiles[0].id,
-            toUserId: currentUserId,
-            type: 'INTERESTED',
-            timestamp: Date.now()
-        });
-        newInteractions.push({
-            fromUserId: oppositeGenderProfiles[1].id,
-            toUserId: currentUserId,
-            type: 'INTERESTED',
-            timestamp: Date.now()
-        });
-    }
-
-    // 2. Seed a "Mutual Match" (User likes someone who likes them)
-    if (oppositeGenderProfiles.length > 2) {
-        // Assume user will like profile[2] later, so we make profile[2] like user now
-        newInteractions.push({
-            fromUserId: oppositeGenderProfiles[2].id,
-            toUserId: currentUserId,
-            type: 'INTERESTED',
-            timestamp: Date.now()
-        });
-        // We artificially add the user's like to create an instant match scenario for testing
-        newInteractions.push({
-            fromUserId: currentUserId,
-            toUserId: oppositeGenderProfiles[2].id,
-            type: 'INTERESTED',
-            timestamp: Date.now()
-        });
-    }
-
-    saveInteraction(newInteractions);
-}
