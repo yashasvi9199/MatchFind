@@ -1,6 +1,6 @@
 import { useState, ChangeEvent } from 'react';
 import { ProfileData } from '../../types';
-import { TITLES, SKINS, DIETS } from '../../constants/data';
+import { TITLES, SKINS, DIETS, BLOOD_GROUPS } from '../../constants/data';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';
 
 interface Props {
@@ -56,8 +56,19 @@ export default function Step1_BasicInfo({ data, update }: Props) {
     }
 
     // Regex: Start with digit, optional dot, optional 0-2 digits. Max length 4.
+    // Allows x.y (3 chars) and x.yz (4 chars)
     if (val.length <= 4 && /^(\d(\.\d{0,2})?)?$/.test(val)) {
         update('height', val);
+    }
+  };
+
+  // Auto-format x.y → x.0y on blur
+  const handleHeightBlur = () => {
+    const val = data.height || '';
+    // If format is x.y (single digit after decimal), convert to x.0y
+    if (/^\d\.\d$/.test(val)) {
+      const [whole, decimal] = val.split('.');
+      update('height', `${whole}.0${decimal}`);
     }
   };
 
@@ -136,7 +147,8 @@ export default function Step1_BasicInfo({ data, update }: Props) {
           <Label>Height (e.g. 5.11)</Label>
           <Input 
             value={data.height} 
-            onChange={handleHeightChange} 
+            onChange={handleHeightChange}
+            onBlur={handleHeightBlur}
             placeholder="x.yz" 
             maxLength={4}
           />
@@ -148,6 +160,13 @@ export default function Step1_BasicInfo({ data, update }: Props) {
             onChange={handleWeightChange} 
             placeholder="Max 3 digits" 
           />
+        </div>
+        <div className="col-span-6 sm:col-span-3">
+          <Label>Blood Group</Label>
+          <Select value={data.bloodGroup} onChange={e => update('bloodGroup', e.target.value)}>
+            <option value="">-- Select --</option>
+            {BLOOD_GROUPS.map(bg => <option key={bg} value={bg}>{bg}</option>)}
+          </Select>
         </div>
         <div className="col-span-6 sm:col-span-6">
           <Label>Skin Color</Label>

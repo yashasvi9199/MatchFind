@@ -51,5 +51,5 @@ export const getMutualMatches = async (currentUserId: string): Promise<UserProfi
 export const seedMockInteractions = async (_currentUserId: string, _gender: 'Male' | 'Female') => {
    // No-op or call server to seed?
    // User asked to move backend code.
-   console.log('Seed interactions is now updated to Backend API usage. You may call /api/seed on backend to populate data.');
+  //  console.log('Seed interactions is now updated to Backend API usage. You may call /api/seed on backend to populate data.');
 };
