@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
     return {
       base: mode === 'production' ? '/MatchFind/' : '/',
       server: {
-        port: 5173,
+        port: 3000,
         host: '0.0.0.0',
       },
       plugins: [react()],

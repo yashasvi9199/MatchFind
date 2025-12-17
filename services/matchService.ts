@@ -1,6 +1,6 @@
 import { Interaction, UserProfile } from '../types';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 export const recordInteraction = async (fromUserId: string, toUserId: string, type: 'INTERESTED' | 'REMOVED') => {
   try {
