@@ -55,30 +55,32 @@ export default function AuthForm() {
 
     try {
       if (mode === 'SIGNUP') {
-        console.log('[Auth] Attempting Signup', { email, phone });
+        const trimmedEmail = email.trim();
+        console.log('[Auth] Attempting Signup', { email: trimmedEmail, phone });
         // Simulating Sign up
         const { error } = await supabase.auth.signUp({
-            email,
+            email: trimmedEmail,
             password,
             options: { data: { phone } }
         });
         if (error) throw error;
       } else {
         // LOGIN MODE
+        const trimmedEmail = email.trim();
         if (loginMethod === 'PASSWORD') {
-            console.log('[Auth] Attempting Password Login', { email });
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            console.log('[Auth] Attempting Password Login', { email: trimmedEmail });
+            const { error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password });
             if (error) throw error;
         } else {
             // OTP LOGIN
             if (!otpSent) {
-                console.log('[Auth] Requesting OTP', { email });
-                const { error } = await supabase.auth.signInWithOtp({ email });
+                console.log('[Auth] Requesting OTP', { email: trimmedEmail });
+                const { error } = await supabase.auth.signInWithOtp({ email: trimmedEmail });
                 if (error) throw error;
                 setOtpSent(true);
             } else {
-                console.log('[Auth] Verifying OTP', { email, otp });
-                const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: 'email' });
+                console.log('[Auth] Verifying OTP', { email: trimmedEmail, otp });
+                const { error } = await supabase.auth.verifyOtp({ email: trimmedEmail, token: otp, type: 'email' });
                 if (error) throw error;
             }
         }
