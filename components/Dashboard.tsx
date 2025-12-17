@@ -88,6 +88,10 @@ export default function Dashboard({ user }: DashboardProps) {
   const [editingSiblingIndex, setEditingSiblingIndex] = useState<number | null>(null);
   const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Admin Validation Override Modal
+  const [showAdminValidationModal, setShowAdminValidationModal] = useState(false);
+  const [pendingValidationErrors, setPendingValidationErrors] = useState<ValidationError[]>([]);
 
   // --- Effects ---
   useEffect(() => {
@@ -251,7 +255,13 @@ export default function Dashboard({ user }: DashboardProps) {
   const handleNext = () => {
     const stepErrors = validateStep(currentStep);
     if (stepErrors.length > 0) {
-        setErrors(stepErrors);
+        if (isAdmin) {
+            // Admin gets option to skip validation
+            setPendingValidationErrors(stepErrors);
+            setShowAdminValidationModal(true);
+        } else {
+            setErrors(stepErrors);
+        }
     } else {
         setErrors([]);
         if (currentStep < STEPS.length - 1) {
@@ -260,6 +270,24 @@ export default function Dashboard({ user }: DashboardProps) {
         } else {
             handleSubmit();
         }
+    }
+  };
+
+  const handleAdminFix = () => {
+    setErrors(pendingValidationErrors);
+    setShowAdminValidationModal(false);
+    setPendingValidationErrors([]);
+  };
+
+  const handleAdminContinue = () => {
+    setShowAdminValidationModal(false);
+    setPendingValidationErrors([]);
+    setErrors([]);
+    if (currentStep < STEPS.length - 1) {
+        setCurrentStep(prev => prev + 1);
+        window.scrollTo(0, 0);
+    } else {
+        handleSubmit();
     }
   };
 
@@ -447,6 +475,50 @@ export default function Dashboard({ user }: DashboardProps) {
                     </div>
                 ))}
             </div>
+
+            {/* Admin Validation Override Modal */}
+            {showAdminValidationModal && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-scaleIn">
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-4">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5" />
+                      {pendingValidationErrors.length} Validation {pendingValidationErrors.length === 1 ? 'Action' : 'Actions'}
+                    </h3>
+                  </div>
+                  
+                  {/* Body */}
+                  <div className="p-6">
+                    <p className="text-gray-600 mb-4">The following fields need attention:</p>
+                    <ul className="space-y-2 mb-6 max-h-48 overflow-y-auto custom-scrollbar">
+                      {pendingValidationErrors.map((err, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm">
+                          <span className="text-orange-500 font-bold shrink-0">{idx + 1}.</span>
+                          <span className="text-gray-700">{err.message}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    {/* Actions */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleAdminFix}
+                        className="flex-1 px-4 py-3 rounded-xl border-2 border-orange-500 text-orange-600 font-bold hover:bg-orange-50 transition-colors"
+                      >
+                        Fix
+                      </button>
+                      <button
+                        onClick={handleAdminContinue}
+                        className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 text-white font-bold hover:from-orange-600 hover:to-rose-600 transition-all shadow-lg shadow-orange-200"
+                      >
+                        Continue
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
     }
@@ -522,6 +594,8 @@ export default function Dashboard({ user }: DashboardProps) {
         .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
         .animate-slideInRight { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
       `}</style>
     </div>
   );
