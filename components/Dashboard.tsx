@@ -79,8 +79,7 @@ export default function Dashboard({ user }: DashboardProps) {
 
   const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
 
-  // Check for Demo User
-  const isDemoUser = user.user_metadata?.is_demo === true;
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // --- Effects ---
   useEffect(() => {
@@ -95,11 +94,15 @@ export default function Dashboard({ user }: DashboardProps) {
       if (data && !error) {
         setFormData(data);
         setAvatarUrl(data.avatar_url || null);
+        setIsAdmin(data.role === 'admin');
         setIsEditingProfile(false);
         setCurrentView('RISHTEY'); 
         seedMockInteractions(user.id, data.gender); 
       } else {
         setIsEditingProfile(true);
+        // If we want admins to skip EVEN IF they have no profile (unlikely), we'd need another way.
+        // But for now, no profile = no role = not admin.
+        setIsAdmin(false);
       }
       setIsLoadingProfile(false);
     };
@@ -365,7 +368,7 @@ export default function Dashboard({ user }: DashboardProps) {
                      Cancel Edit
                    </button>
                 )}
-                {isDemoUser && (
+                {isAdmin && (
                     <button type="button" onClick={() => setCurrentStep(prev => prev < STEPS.length - 1 ? prev + 1 : prev)} className="text-xs font-bold text-gray-300 hover:text-rose-600 flex items-center transition-all">
                     Dev Skip <SkipForward className="h-3 w-3 ml-1" />
                     </button>
