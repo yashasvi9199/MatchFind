@@ -139,8 +139,8 @@ export default function AuthForm() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-6 sm:p-12 bg-white relative z-10">
-        <div className="w-full max-w-md space-y-8">
+      <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-6 sm:p-12 bg-white/90 backdrop-blur-sm relative z-10">
+        <div className="w-full max-w-md space-y-8 bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-xl shadow-rose-100/50 border border-white/50">
             
             {/* Mobile Header Logo */}
             <div className="md:hidden flex flex-col items-center mb-6">

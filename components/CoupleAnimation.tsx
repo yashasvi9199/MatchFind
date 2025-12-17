@@ -280,6 +280,32 @@ const CoupleAnimation = () => {
         ctx.stroke();
       }
 
+      // Draw decorative background glow when formed
+      if (state === 2) {
+        const cx = width / 2;
+        const cy = height / 2;
+        const glowRadius = Math.min(width, height) * 0.45;
+
+        // Outer soft glow
+        const outerGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
+        outerGlow.addColorStop(0, 'rgba(254, 205, 211, 0.6)'); // rose-200
+        outerGlow.addColorStop(0.5, 'rgba(254, 226, 226, 0.4)'); // rose-100
+        outerGlow.addColorStop(1, 'rgba(255, 241, 242, 0)');
+        ctx.fillStyle = outerGlow;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, glowRadius, glowRadius * 1.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner warm glow
+        const innerGlow = ctx.createRadialGradient(cx, cy - 20, 0, cx, cy - 20, glowRadius * 0.5);
+        innerGlow.addColorStop(0, 'rgba(253, 164, 175, 0.3)'); // rose-300
+        innerGlow.addColorStop(1, 'rgba(254, 205, 211, 0)');
+        ctx.fillStyle = innerGlow;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - 20, glowRadius * 0.5, glowRadius * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       // Draw particles - batch by color
       const particleColor = state === 2 ? '#e11d48' : '#fb7185';
       const particleRadius = state === 2 ? 2.2 : 1.5;
