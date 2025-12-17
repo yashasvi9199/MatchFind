@@ -468,7 +468,7 @@ export default function Dashboard({ user }: DashboardProps) {
         case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} />;
         case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} {...commonViewProps} />;
         case 'MATCH': return <MatchView currentUser={userProfile} {...commonViewProps} />;
-        case 'SEARCH': return <SearchView />; 
+        case 'SEARCH': return <SearchView currentUser={userProfile} />; 
         default: return null;
     }
   };
