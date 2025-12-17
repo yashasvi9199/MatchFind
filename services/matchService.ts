@@ -1,6 +1,6 @@
 import { Interaction, UserProfile } from '../types';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://match-find-backend.vercel.app';
 
 export const recordInteraction = async (fromUserId: string, toUserId: string, type: 'INTERESTED' | 'REMOVED') => {
   try {
