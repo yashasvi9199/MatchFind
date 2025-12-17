@@ -77,6 +77,8 @@ export default function Dashboard({ user }: DashboardProps) {
   // Specific Step State Lifted
   const [editingSiblingIndex, setEditingSiblingIndex] = useState<number | null>(null);
 
+  const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
+
   // Check for Demo User
   const isDemoUser = user.user_metadata?.is_demo === true;
 
@@ -115,6 +117,16 @@ export default function Dashboard({ user }: DashboardProps) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+  };
+  
+  const handleEditProfile = (profile: UserProfile) => {
+      // Admin editing another user
+      setFormData(profile);
+      setAvatarUrl(profile.avatar_url || null);
+      setEditingTargetId(profile.id);
+      setIsEditingProfile(true);
+      setCurrentStep(0);
+      setHighestStepReached(STEPS.length - 1); // Unlock all steps for admin edit
   };
 
   const updateField = (field: keyof ProfileData, value: string | number) => {
@@ -254,8 +266,10 @@ export default function Dashboard({ user }: DashboardProps) {
     setIsSaving(true);
     try {
       let finalAvatarUrl = avatarUrl;
+      const targetId = editingTargetId || user.id;
+
       if (avatarFile) {
-        const uploadedUrl = await uploadProfileImage(avatarFile, user.id);
+        const uploadedUrl = await uploadProfileImage(avatarFile, targetId);
         if (uploadedUrl) {
             finalAvatarUrl = uploadedUrl;
             setAvatarUrl(uploadedUrl);
@@ -267,10 +281,11 @@ export default function Dashboard({ user }: DashboardProps) {
       if (formData.educationDegree) eduString += ` (${formData.educationDegree})`;
 
       const finalData = { ...formData, education: eduString, avatar_url: finalAvatarUrl || '' };
-      await createProfile(user.id, finalData); 
+      await createProfile(targetId, finalData); 
       
       setIsEditingProfile(false);
-      setCurrentView('PROFILE');
+      setEditingTargetId(null);
+      setCurrentView(editingTargetId ? 'RISHTEY' : 'PROFILE');
       window.scrollTo(0, 0);
     } catch (error: unknown) {
       console.error(error);
@@ -344,6 +359,12 @@ export default function Dashboard({ user }: DashboardProps) {
                     )}
                     <h2 className="text-xl font-bold text-gray-800">{STEPS[currentStep]}</h2>
                 </div>
+                {/* Cancel Button if editing other */}
+                {editingTargetId && (
+                   <button onClick={() => { setIsEditingProfile(false); setEditingTargetId(null); setCurrentView('RISHTEY'); }} className="text-sm text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg">
+                     Cancel Edit
+                   </button>
+                )}
                 {isDemoUser && (
                     <button type="button" onClick={() => setCurrentStep(prev => prev < STEPS.length - 1 ? prev + 1 : prev)} className="text-xs font-bold text-gray-300 hover:text-rose-600 flex items-center transition-all">
                     Dev Skip <SkipForward className="h-3 w-3 ml-1" />
@@ -391,7 +412,7 @@ export default function Dashboard({ user }: DashboardProps) {
     const userProfile: UserProfile = { ...formData, id: user.id };
     switch(currentView) {
         case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} />;
-        case 'RISHTEY': return <RishteyView currentUser={userProfile} />;
+        case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} />;
         case 'MATCH': return <MatchView currentUser={userProfile} />;
         case 'SEARCH': return <SearchView />;
         default: return null;

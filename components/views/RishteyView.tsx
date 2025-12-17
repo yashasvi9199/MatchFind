@@ -8,6 +8,7 @@ import { Heart, X as XIcon, Filter } from 'lucide-react';
 
 interface Props {
   currentUser: UserProfile;
+  onEditProfile?: (profile: UserProfile) => void;
 }
 
 const INITIAL_FILTERS: FilterState = {
@@ -19,11 +20,13 @@ const INITIAL_FILTERS: FilterState = {
   healthIssues: 'any',
 };
 
-export default function RishteyView({ currentUser }: Props) {
+export default function RishteyView({ currentUser, onEditProfile }: Props) {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+
+  const isAdmin = currentUser.role === 'admin';
 
   useEffect(() => {
     // Load potential matches on mount
@@ -131,17 +134,26 @@ export default function RishteyView({ currentUser }: Props) {
                 </div>
                 
                 {/* Quick Actions (Stop Propagation to avoid opening modal when clicking buttons) */}
-                <div className="flex border-t border-gray-100">
+                <div className="border-t border-gray-100 divide-x divide-gray-100 flex">
                     <button 
                         onClick={(e) => { e.stopPropagation(); handleAction(profile, 'REMOVED'); }}
-                        className="flex-1 py-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex justify-center"
+                        className="flex-1 py-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex justify-center items-center"
                     >
                         <XIcon className="w-5 h-5"/>
                     </button>
-                    <div className="w-px bg-gray-100"></div>
+                    
+                    {isAdmin && onEditProfile && (
+                        <button 
+                             onClick={(e) => { e.stopPropagation(); onEditProfile(profile); }}
+                             className="flex-1 py-3 bg-gray-50 hover:bg-blue-50 text-blue-500 hover:text-blue-700 transition-colors flex justify-center items-center font-bold text-xs uppercase tracking-wider"
+                        >
+                            Edit
+                        </button>
+                    )}
+
                     <button 
                         onClick={(e) => { e.stopPropagation(); handleAction(profile, 'INTERESTED'); }}
-                        className="flex-1 py-3 bg-gray-50 hover:bg-green-50 text-gray-400 hover:text-green-500 transition-colors flex justify-center"
+                        className="flex-1 py-3 bg-gray-50 hover:bg-green-50 text-gray-400 hover:text-green-500 transition-colors flex justify-center items-center"
                     >
                         <Heart className="w-5 h-5 fill-current"/>
                     </button>

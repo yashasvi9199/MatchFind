@@ -62,6 +62,7 @@ export interface ProfileData {
 
 export interface UserProfile extends ProfileData {
   id: string;
+  role?: 'user' | 'admin';
   email?: string; // Added for mock login
   phone?: string; // Added for mock login
   password?: string; // Added for mock login
