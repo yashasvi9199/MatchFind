@@ -45,7 +45,7 @@ const INITIAL_STATE: ProfileData = {
   paternalSide: { ...INITIAL_FAMILY_MEMBER, title: 'Mr' }, 
   siblings: [],
   healthIssues: [],
-  partnerAgeMin: '23', partnerAgeMax: '27',
+  partnerAgeMin: '', partnerAgeMax: '',
   expectations: []
 };
 

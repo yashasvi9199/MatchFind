@@ -87,9 +87,9 @@ export default function Step7_Preferences({ data, update, setExpectations }: Pro
 
             <div className="space-y-2">
               {data.expectations.map((exp, idx) => (
-                 <div key={idx} className="flex justify-between items-center bg-gray-50 p-3 border border-gray-100 rounded-lg group">
-                    <span className="text-sm text-gray-700 font-medium"><span className="text-rose-400 mr-2 font-bold">{idx + 1}.</span> {exp}</span>
-                    <button onClick={() => removeExpectation(idx)} className="text-gray-300 hover:text-red-500 transition-colors"><X className="h-4 w-4" /></button>
+                 <div key={idx} className="flex justify-between items-center bg-gradient-to-r from-rose-50 to-orange-50 p-3 border border-rose-200 rounded-lg group shadow-sm">
+                    <span className="text-sm text-gray-800 font-medium"><span className="text-rose-500 mr-2 font-bold">{idx + 1}.</span> {exp}</span>
+                    <button onClick={() => removeExpectation(idx)} className="text-rose-400 hover:text-red-600 hover:bg-red-100 p-1 rounded transition-colors"><X className="h-4 w-4" /></button>
                  </div>
               ))}
             </div>
