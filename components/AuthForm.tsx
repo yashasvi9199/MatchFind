@@ -18,11 +18,13 @@ export default function AuthForm() {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const toggleMode = () => {
     console.log(`[Auth] Switching mode to: ${mode === 'LOGIN' ? 'SIGNUP' : 'LOGIN'}`);
     setMode(prev => prev === 'LOGIN' ? 'SIGNUP' : 'LOGIN');
     setError(null);
+    setSuccessMsg(null);
     setOtpSent(false);
   };
 
@@ -50,37 +52,71 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     console.log(`[Auth] Submitting form. Mode: ${mode}, Method: ${loginMethod}`);
 
     try {
       if (mode === 'SIGNUP') {
-        const trimmedEmail = email.trim();
-        console.log('[Auth] Attempting Signup', { email: trimmedEmail, phone });
-        // Simulating Sign up
-        const { error } = await supabase.auth.signUp({
-            email: trimmedEmail,
-            password,
-            options: { data: { phone } }
+        // Remove all whitespace and invisible characters
+        const cleanEmail = email.replace(/\s+/g, '').toLowerCase();
+        
+        console.log('[Auth] Supabase Config URL:', supabase['supabaseUrl']); // Debugging
+        
+        // --- PRE-VALIDATION ---
+        if (!cleanEmail || !cleanEmail.includes('@')) {
+            setError('Invalid email format');
+            setLoading(false);
+            return;
+        }
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters');
+            setLoading(false);
+            return;
+        }
+        // -----------------------
+
+        console.log('[Auth] Attempting Signup', { 
+            original: email, 
+            cleaned: cleanEmail, 
+            passwordLen: password.length 
         });
+        
+        const { data, error } = await supabase.auth.signUp({
+            email: cleanEmail,
+            password,
+            options: {
+              emailRedirectTo: window.location.origin, // Force redirect back to this app (localhost or prod)
+              data: { phone }
+            }
+        });
+
+        if (error) throw error;
+        
+        if (data.user && !data.session) {
+            setSuccessMsg('Signup successful! Please check your email for the confirmation link.');
+            return; // Stop here, don't throw, just show message
+        }
         if (error) throw error;
       } else {
         // LOGIN MODE
-        const trimmedEmail = email.trim();
+        // Remove all whitespace and invisible characters
+        const cleanEmail = email.replace(/\s+/g, '').toLowerCase();
+        
         if (loginMethod === 'PASSWORD') {
-            console.log('[Auth] Attempting Password Login', { email: trimmedEmail });
-            const { error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password });
+            console.log('[Auth] Attempting Password Login', { email: cleanEmail });
+            const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
             if (error) throw error;
         } else {
             // OTP LOGIN
             if (!otpSent) {
-                console.log('[Auth] Requesting OTP', { email: trimmedEmail });
-                const { error } = await supabase.auth.signInWithOtp({ email: trimmedEmail });
+                console.log('[Auth] Requesting OTP', { email: cleanEmail });
+                const { error } = await supabase.auth.signInWithOtp({ email: cleanEmail });
                 if (error) throw error;
                 setOtpSent(true);
             } else {
-                console.log('[Auth] Verifying OTP', { email: trimmedEmail, otp });
-                const { error } = await supabase.auth.verifyOtp({ email: trimmedEmail, token: otp, type: 'email' });
+                console.log('[Auth] Verifying OTP', { email: cleanEmail, otp });
+                const { error } = await supabase.auth.verifyOtp({ email: cleanEmail, token: otp, type: 'email' });
                 if (error) throw error;
             }
         }
@@ -130,6 +166,12 @@ export default function AuthForm() {
             {error && (
                 <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm flex items-start shadow-sm animate-shake">
                 <span className="font-medium mr-1">Error:</span> {error}
+                </div>
+            )}
+
+            {successMsg && (
+                <div className="p-4 bg-green-50 border border-green-100 text-green-600 rounded-xl text-sm flex items-start shadow-sm animate-pulse">
+                <span className="font-medium mr-1">Success:</span> {successMsg}
                 </div>
             )}
 
