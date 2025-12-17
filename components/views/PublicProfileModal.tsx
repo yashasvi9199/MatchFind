@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { UserProfile } from '../../types';
 import { X, Heart, ThumbsDown, Briefcase, MapPin, CheckCircle2 } from 'lucide-react';
 
@@ -17,7 +18,7 @@ export default function PublicProfileModal({ profile, onClose, onAction, isMatch
     return '•'.repeat(8) + ' (Hidden)';
   };
 
-  return (
+  return createPortal(
     // Outer Container: Fixed, Full Screen, High Z-Index. 
     // Removed animations on parent to avoid transform issues.
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -148,7 +149,8 @@ export default function PublicProfileModal({ profile, onClose, onAction, isMatch
         @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slideUp { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
 
