@@ -6,6 +6,8 @@ import { Heart, ArrowRight, Stars } from 'lucide-react';
 
 interface Props {
   currentUser: UserProfile;
+  isProfileComplete?: boolean;
+  onRestrictedAction?: () => void;
 }
 
 type Tab = 'LIKED' | 'LIKED_BY' | 'MATCHES';

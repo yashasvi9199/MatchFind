@@ -5,9 +5,11 @@ import { User, Users, Search, HeartHandshake, Menu, X } from 'lucide-react';
 interface Props {
   currentView: AppView;
   setView: (view: AppView) => void;
+  isProfileComplete: boolean;
+  onRestrictedAction: () => void;
 }
 
-export default function FloatingNav({ currentView, setView }: Props) {
+export default function FloatingNav({ currentView, setView, isProfileComplete, onRestrictedAction }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Helper to check if active
@@ -19,6 +21,12 @@ export default function FloatingNav({ currentView, setView }: Props) {
   };
 
   const handleNav = (view: AppView) => {
+    // RESTRICTION CHECK
+    if (!isProfileComplete && (view === 'SEARCH' || view === 'MATCH')) {
+        onRestrictedAction();
+        return;
+    }
+    
     console.log(`[FloatingNav] Navigating to ${view}`);
     setView(view);
     setIsOpen(false);

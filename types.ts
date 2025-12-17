@@ -69,6 +69,7 @@ export interface UserProfile extends ProfileData {
   avatar_url?: string;
   updated_at?: string;
   is_demo?: boolean; // Added for demo credentials check
+  is_complete_profile?: boolean;
 }
 
 export type AuthMode = 'LOGIN' | 'SIGNUP';

@@ -9,6 +9,7 @@ import { seedMockInteractions } from '../services/matchService';
 import { sanitizeInput } from '../utils/helpers';
 
 // Steps Components
+import Step0_Initial from './steps/Step0_Initial';
 import Step1_BasicInfo from './steps/Step1_BasicInfo';
 import Step2_Social from './steps/Step2_Social';
 import Step3_Location from './steps/Step3_Location';
@@ -24,6 +25,7 @@ import RishteyView from './views/RishteyView';
 import MatchView from './views/MatchView';
 import SearchView from './views/SearchView';
 import FloatingNav from './navigation/FloatingNav';
+import IncompleteProfileModal from './common/IncompleteProfileModal';
 
 const INITIAL_FAMILY_MEMBER: FamilyMember = {
   title: 'Mr', name: '', gotra: '', caste: '', occupation: ''
@@ -59,12 +61,20 @@ interface ValidationError {
 export default function Dashboard({ user }: DashboardProps) {
   // --- State ---
   const [currentView, setCurrentView] = useState<AppView>('PROFILE');
-  const [isEditingProfile, setIsEditingProfile] = useState(true); 
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   
+  // Data State
+  const [hasProfile, setHasProfile] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [formData, setFormData] = useState<ProfileData>(INITIAL_STATE);
+  
+  // Editing State
+  const [isEditingProfile, setIsEditingProfile] = useState(false); 
   const [currentStep, setCurrentStep] = useState(0);
   const [highestStepReached, setHighestStepReached] = useState(0);
-  const [formData, setFormData] = useState<ProfileData>(INITIAL_STATE);
+
+  // Restriction Modal
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
   
   // Media State
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -76,9 +86,7 @@ export default function Dashboard({ user }: DashboardProps) {
   
   // Specific Step State Lifted
   const [editingSiblingIndex, setEditingSiblingIndex] = useState<number | null>(null);
-
   const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
-
   const [isAdmin, setIsAdmin] = useState(false);
 
   // --- Effects ---
@@ -95,14 +103,16 @@ export default function Dashboard({ user }: DashboardProps) {
         setFormData(data);
         setAvatarUrl(data.avatar_url || null);
         setIsAdmin(data.role === 'admin');
+        setHasProfile(true);
+        setIsProfileComplete(data.is_complete_profile || false);
+        
         setIsEditingProfile(false);
         setCurrentView('RISHTEY'); 
         seedMockInteractions(user.id, data.gender); 
       } else {
-        setIsEditingProfile(true);
-        // If we want admins to skip EVEN IF they have no profile (unlikely), we'd need another way.
-        // But for now, no profile = no role = not admin.
-        setIsAdmin(false);
+        setHasProfile(false);
+        setIsProfileComplete(false);
+        setIsEditingProfile(true); // Should trigger Step 0 flow if handled in render
       }
       setIsLoadingProfile(false);
     };
@@ -122,22 +132,56 @@ export default function Dashboard({ user }: DashboardProps) {
     await supabase.auth.signOut();
   };
   
-  const handleEditProfile = (profile: UserProfile) => {
-      // Admin editing another user
+  const handleEditProfile = (profile: UserProfile, forceView = false) => {
+      if (!forceView && !isProfileComplete && profile.id === user.id) {
+          // If editing own incomplete profile, we go to wizard
+      }
+
+      // Admin editing another user OR user editing self
       setFormData(profile);
       setAvatarUrl(profile.avatar_url || null);
-      setEditingTargetId(profile.id);
+      setEditingTargetId(profile.id === user.id ? null : profile.id);
       setIsEditingProfile(true);
-      setCurrentStep(0);
-      setHighestStepReached(STEPS.length - 1); // Unlock all steps for admin edit
+      setCurrentStep(0); // Start at Step 1 Basic Info
+      setHighestStepReached(STEPS.length - 1); 
+  };
+
+  const handleRestrictedAction = () => {
+      setShowRestrictionModal(true);
+  };
+  
+  const handleStep0Submit = async (basicData: { name: string, gender: any, age: any, title: any }) => {
+      setIsSaving(true);
+      try {
+          const newProfile: ProfileData = {
+              ...INITIAL_STATE,
+              ...basicData,
+          };
+          
+          // is_complete_profile defaults to false in DB, but we pass it effectively via lack of it or explicit false if we added it to interface
+          // We will update the ProfileData type later if needed, but for now Supabase allows extra fields if dynamic, or we ignore it.
+          // Actually we need to make sure we save it.
+          // Since our types might not have is_complete_profile, we cast or just rely on DB default.
+          // BUT createProfile spreads data. 
+          
+          await createProfile(user.id, newProfile);
+          
+          setFormData(newProfile);
+          setHasProfile(true);
+          setIsProfileComplete(false);
+          setIsEditingProfile(false); // Exit editing mode
+          setCurrentView('RISHTEY');
+      } catch (err) {
+          console.error(err);
+          alert('Failed to create profile');
+      } finally {
+          setIsSaving(false);
+      }
   };
 
   const updateField = (field: keyof ProfileData, value: string | number) => {
     const sanitizedValue = typeof value === 'string' ? sanitizeInput(value) : value;
-    
     setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
-    
-    // Auto-clear error for this field
     setErrors(prev => prev.filter(e => e.field !== field));
   };
 
@@ -154,12 +198,10 @@ export default function Dashboard({ user }: DashboardProps) {
     setFormData(prev => ({ ...prev, siblings }));
   };
 
-  // --- Validation Logic ---
-
+  // --- Validation Logic (Steps 1-8) ---
   const validateStep = (stepIndex: number): ValidationError[] => {
     const errs: ValidationError[] = [];
     const d = formData;
-
     const req = (field: keyof ProfileData, msg: string) => {
         if (!d[field] || d[field].toString().trim() === '') errs.push({ field, message: msg });
     };
@@ -178,54 +220,27 @@ export default function Dashboard({ user }: DashboardProps) {
             req('diet', 'Diet preference is required');
             if (d.age < 18 || d.age > 60) errs.push({ field: 'age', message: 'Age must be between 18 and 60' });
             break;
-        case 1: // Social
-            req('caste', 'Caste is required');
-            if (d.caste && !d.gotra) req('gotra', 'Gotra is required');
-            break;
-        case 2: // Location
+        case 1: req('caste', 'Caste is required'); if (d.caste && !d.gotra) req('gotra', 'Gotra is required'); break;
+        case 2: 
             req('birthPlace', 'Birth place is required');
-            if(d.birthPlace && d.birthPlace.length < 3) errs.push({field: 'birthPlace', message: 'Birth place must be at least 3 characters'});
-            
             req('nativeState', 'Native state is required');
-            if(d.nativeState && d.nativeState.length < 3) errs.push({field: 'nativeState', message: 'State must be at least 3 characters'});
-            
             req('nativeCity', 'Native city is required');
-            if(d.nativeCity && d.nativeCity.length < 3) errs.push({field: 'nativeCity', message: 'City must be at least 3 characters'});
-            
             req('currentCountry', 'Current country is required');
-            if(d.currentCountry && d.currentCountry.length < 3) errs.push({field: 'currentCountry', message: 'Country must be at least 3 characters'});
-            
             req('currentCity', 'Current city is required');
-            if(d.currentCity && d.currentCity.length < 3) errs.push({field: 'currentCity', message: 'City must be at least 3 characters'});
             break;
-        case 3: // Education
-            req('educationLevel', 'Education level is required');
-            req('occupation', 'Occupation is required');
-            req('salary', 'Salary range is required');
-            break;
-        case 4: // Family
+        case 3: req('educationLevel', 'Education level is required'); req('occupation', 'Occupation is required'); req('salary', 'Salary range is required'); break;
+        case 4: 
             if (!d.father.name) errs.push({ field: 'father.name', message: "Father's name is required" });
             if (!d.father.occupation) errs.push({ field: 'father.occupation', message: "Father's occupation is required" });
             if (!d.mother.name) errs.push({ field: 'mother.name', message: "Mother's name is required" });
-            // Sibling Check
-            if (editingSiblingIndex !== null) {
-                errs.push({ field: 'siblings', message: 'Please save sibling details before proceeding' });
-            }
+            if (editingSiblingIndex !== null) errs.push({ field: 'siblings', message: 'Please save sibling details before proceeding' });
             break;
-        case 5: // Health
-            // No strict validation required for health array
+        case 6: 
+            if (!d.partnerAgeMin || !d.partnerAgeMax) errs.push({ field: 'partnerAge', message: 'Partner age range is required' });
+            else if (Number(d.partnerAgeMin) >= Number(d.partnerAgeMax)) errs.push({ field: 'partnerAge', message: 'Min age must be less than Max age' });
+            if (d.expectations.length === 0) errs.push({ field: 'expectations', message: 'Add at least one expectation' });
             break;
-        case 6: // Preferences
-            if (!d.partnerAgeMin || !d.partnerAgeMax) {
-                errs.push({ field: 'partnerAge', message: 'Partner age range is required' });
-            } else if (Number(d.partnerAgeMin) >= Number(d.partnerAgeMax)) {
-                errs.push({ field: 'partnerAge', message: 'Min age must be less than Max age' });
-            }
-            if (d.expectations.length === 0) {
-                errs.push({ field: 'expectations', message: 'Add at least one expectation' });
-            }
-            break;
-        case 7: // Media
+        case 7: 
             if (!d.bio) errs.push({ field: 'bio', message: 'Bio is required' });
             if (!avatarFile && !avatarUrl) errs.push({ field: 'avatar', message: 'Profile photo is required' });
             break;
@@ -283,8 +298,20 @@ export default function Dashboard({ user }: DashboardProps) {
       if (formData.educationStream) eduString += ` - ${formData.educationStream}`;
       if (formData.educationDegree) eduString += ` (${formData.educationDegree})`;
 
-      const finalData = { ...formData, education: eduString, avatar_url: finalAvatarUrl || '' };
+      // When saving Full Wizard, we set is_complete_profile = true
+      // Need to cast to any to include is_complete_profile if not in type
+      const finalData: any = { 
+          ...formData, 
+          education: eduString, 
+          avatar_url: finalAvatarUrl || '',
+          is_complete_profile: true 
+      };
+
       await createProfile(targetId, finalData); 
+      
+      if (!editingTargetId) {
+          setIsProfileComplete(true);
+      }
       
       setIsEditingProfile(false);
       setEditingTargetId(null);
@@ -319,6 +346,12 @@ export default function Dashboard({ user }: DashboardProps) {
   const renderMainContent = () => {
     if (isLoadingProfile) return <div className="text-center py-20 text-gray-500">Loading...</div>;
 
+    // STEP 0: No Profile -> Show Step 0 Form
+    if (!hasProfile) {
+        return <Step0_Initial onSubmit={handleStep0Submit} isSubmitting={isSaving} />;
+    }
+
+    // WIZARD: Editing Profile
     if (isEditingProfile) {
         return (
           <div className="relative">
@@ -368,6 +401,13 @@ export default function Dashboard({ user }: DashboardProps) {
                      Cancel Edit
                    </button>
                 )}
+                 {/* Cancel if editing self but has profile (Cancel completes nothing but goes back) */}
+                 {!editingTargetId && (
+                    <button onClick={() => { setIsEditingProfile(false); setCurrentView('RISHTEY'); }} className="text-sm text-gray-400 hover:text-gray-600 px-3">
+                        Cancel
+                    </button>
+                 )}
+
                 {isAdmin && (
                     <button type="button" onClick={() => setCurrentStep(prev => prev < STEPS.length - 1 ? prev + 1 : prev)} className="text-xs font-bold text-gray-300 hover:text-rose-600 flex items-center transition-all">
                     Dev Skip <SkipForward className="h-3 w-3 ml-1" />
@@ -392,7 +432,7 @@ export default function Dashboard({ user }: DashboardProps) {
               </div>
             </div>
 
-            {/* Error Stack (Top Right, Small) */}
+            {/* Error Stack */}
             <div className="fixed top-24 right-4 z-[100] flex flex-col gap-2 pointer-events-none w-64">
                 {errors.map((err, idx) => (
                     <div key={`${err.field}-${idx}`} className="pointer-events-auto bg-white border-l-4 border-red-500 rounded shadow-xl p-3 flex items-start gap-2 animate-slideInRight">
@@ -412,12 +452,23 @@ export default function Dashboard({ user }: DashboardProps) {
     }
 
     // --- MAIN VIEWS ---
+    // If we are here, hasProfile is true, and isEditingProfile is false.
+    // Standard views.
+    
+    // We pass isProfileComplete to views that need to restrict actions
     const userProfile: UserProfile = { ...formData, id: user.id };
+    
+    // Pass callback to restricted views
+    const commonViewProps = {
+        isProfileComplete,
+        onRestrictedAction: handleRestrictedAction
+    };
+
     switch(currentView) {
         case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} />;
-        case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} />;
-        case 'MATCH': return <MatchView currentUser={userProfile} />;
-        case 'SEARCH': return <SearchView />;
+        case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} {...commonViewProps} />;
+        case 'MATCH': return <MatchView currentUser={userProfile} {...commonViewProps} />;
+        case 'SEARCH': return <SearchView />; 
         default: return null;
     }
   };
@@ -442,7 +493,26 @@ export default function Dashboard({ user }: DashboardProps) {
         {renderMainContent()}
       </main>
 
-      {!isEditingProfile && <FloatingNav currentView={currentView} setView={setCurrentView} />}
+      {/* Floating Nav: Only shows if user HAS a profile and IS NOT editing. */}
+      {/* Also pass isProfileComplete to FloatingNav so it can intercept Search/Match clicks. */}
+      {!isEditingProfile && hasProfile && (
+        <FloatingNav 
+            currentView={currentView} 
+            setView={setCurrentView} 
+            isProfileComplete={isProfileComplete}
+            onRestrictedAction={handleRestrictedAction}
+        />
+      )}
+      
+      <IncompleteProfileModal 
+          isOpen={showRestrictionModal} 
+          onCancel={() => setShowRestrictionModal(false)}
+          onProfile={() => {
+              setShowRestrictionModal(false);
+              setIsEditingProfile(true);
+              setCurrentStep(0);
+          }}
+      />
       
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -456,3 +526,4 @@ export default function Dashboard({ user }: DashboardProps) {
     </div>
   );
 }
+

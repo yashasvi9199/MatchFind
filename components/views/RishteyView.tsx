@@ -9,6 +9,8 @@ import { Heart, X as XIcon, Filter } from 'lucide-react';
 interface Props {
   currentUser: UserProfile;
   onEditProfile?: (profile: UserProfile) => void;
+  isProfileComplete?: boolean;
+  onRestrictedAction?: () => void;
 }
 
 const INITIAL_FILTERS: FilterState = {
@@ -20,7 +22,7 @@ const INITIAL_FILTERS: FilterState = {
   healthIssues: 'any',
 };
 
-export default function RishteyView({ currentUser, onEditProfile }: Props) {
+export default function RishteyView({ currentUser, onEditProfile, isProfileComplete = true, onRestrictedAction }: Props) {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
@@ -52,6 +54,13 @@ export default function RishteyView({ currentUser, onEditProfile }: Props) {
   }, [profiles, filters]);
 
   const handleAction = (targetProfile: UserProfile, type: 'INTERESTED' | 'REMOVED') => {
+    // RESTRICTION CHECK
+    if (!isProfileComplete && onRestrictedAction) {
+        // If profile incomplete, trigger modal and do NOT record interaction
+        onRestrictedAction();
+        return;
+    }
+
     console.log(`[Rishtey] Action ${type} on ${targetProfile.name}`);
     
     // Save to local storage
