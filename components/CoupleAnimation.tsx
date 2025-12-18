@@ -39,7 +39,7 @@ const CoupleAnimation = () => {
     const particles: Particle[] = [];
 
     // Spatial hash grid for O(n) line drawing
-    let grid: Map<string, number[]> = new Map();
+    const grid: Map<string, number[]> = new Map();
 
     const getGridKey = (x: number, y: number): string => {
       const gx = Math.floor(x / GRID_CELL_SIZE);

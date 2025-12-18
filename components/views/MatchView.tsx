@@ -32,7 +32,7 @@ export default function MatchView({ currentUser }: Props) {
         // TILE STYLE FOR MATCHES
         return (
             <div key={profile.id} onClick={() => setSelectedProfile(profile)} className="cursor-pointer group relative h-80 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-                <img src={profile.avatar_url} className="w-full h-full object-cover" alt={profile.name} />
+                <img src={profile.avatar_url} className="w-full h-full object-cover" alt={profile.name} crossOrigin="anonymous" />
                 <div className="absolute inset-0 bg-gradient-to-t from-rose-900/80 via-transparent to-transparent">
                      <div className="absolute bottom-0 left-0 p-6 text-white">
                          <h3 className="text-2xl font-bold flex items-center gap-2">{profile.name}, {profile.age} <Stars className="w-5 h-5 text-yellow-400 fill-current animate-pulse"/></h3>
@@ -47,7 +47,7 @@ export default function MatchView({ currentUser }: Props) {
     // LIST STYLE FOR OTHERS
     return (
         <div key={profile.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4 mb-3">
-             <img src={profile.avatar_url} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" alt={profile.name} />
+             <img src={profile.avatar_url} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" alt={profile.name} crossOrigin="anonymous" />
              <div>
                 <h4 className="font-bold text-gray-800">{profile.title} {profile.name}</h4>
                 <p className="text-xs text-gray-500">{profile.education}</p>
