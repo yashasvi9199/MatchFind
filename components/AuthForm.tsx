@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { AuthMode, LoginMethod } from '../types';
 import { Mail, KeyRound, Loader2, ArrowRight, Heart, Phone, Lock } from 'lucide-react';
@@ -19,6 +19,19 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  
+  // Mobile Detection
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggleMode = () => {
     console.log(`[Auth] Switching mode to: ${mode === 'LOGIN' ? 'SIGNUP' : 'LOGIN'}`);
@@ -135,12 +148,12 @@ export default function AuthForm() {
       
       {/* Left Side - Animation (Desktop) */}
       <div className="hidden md:flex md:w-1/2 lg:w-3/5 bg-rose-50 relative items-center justify-center overflow-hidden">
-         <CoupleAnimation />
+         {!isMobile && <CoupleAnimation />}
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-6 sm:p-12 bg-white/90 backdrop-blur-sm relative z-10">
-        <div className="w-full max-w-md space-y-8 bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-xl shadow-rose-100/50 border border-white/50">
+      <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-6 sm:p-12 md:bg-white/90 md:backdrop-blur-sm relative z-10">
+        <div className="w-full max-w-md space-y-8 md:bg-white/70 md:backdrop-blur-md rounded-3xl p-8 md:shadow-xl md:shadow-rose-100/50 md:border md:border-white/50">
             
             {/* Mobile Header Logo */}
             <div className="md:hidden flex flex-col items-center mb-6">
