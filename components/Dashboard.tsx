@@ -539,7 +539,7 @@ export default function Dashboard({ user }: DashboardProps) {
     };
 
     switch(currentView) {
-        case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} />;
+        case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} onLogout={handleLogout} />;
         case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} {...commonViewProps} />;
         case 'MATCH': return <MatchView currentUser={userProfile} {...commonViewProps} />;
         case 'SEARCH': return <SearchView currentUser={userProfile} />; 
@@ -557,7 +557,7 @@ export default function Dashboard({ user }: DashboardProps) {
              </div>
              <span className="text-2xl font-bold text-gray-900 tracking-tight">Match<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-orange-600">Find</span></span>
           </div>
-          <button onClick={handleLogout} className="flex items-center text-sm font-bold text-gray-500 hover:text-rose-600 transition-colors bg-white border border-gray-200 hover:border-rose-200 px-4 py-2 rounded-xl">
+          <button onClick={handleLogout} className="hidden md:flex items-center text-sm font-bold text-gray-500 hover:text-rose-600 transition-colors bg-white border border-gray-200 hover:border-rose-200 px-4 py-2 rounded-xl">
             <LogOut className="h-4 w-4 mr-2" /> Sign Out
           </button>
         </div>
