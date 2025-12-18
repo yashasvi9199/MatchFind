@@ -43,3 +43,6 @@ capacitor.config.json
 capacitor.config.ts.old
 node_modules/
 dist/
+
+# Development Specific Files
+Feature Request.md
