@@ -9,7 +9,7 @@ import { seedMockInteractions } from '../services/matchService';
 import { sanitizeInput } from '../utils/helpers';
 
 // Steps Components
-import Step0_Initial from './steps/Step0_Initial';
+import Step0_Initial, { Step0Data } from './steps/Step0_Initial';
 import Step1_BasicInfo from './steps/Step1_BasicInfo';
 import Step2_Social from './steps/Step2_Social';
 import Step3_Location from './steps/Step3_Location';
@@ -154,12 +154,15 @@ export default function Dashboard({ user }: DashboardProps) {
       setShowRestrictionModal(true);
   };
   
-  const handleStep0Submit = async (basicData: { name: string, gender: any, age: any, title: any }) => {
+  const handleStep0Submit = async (basicData: Step0Data) => {
       setIsSaving(true);
       try {
           const newProfile: ProfileData = {
               ...INITIAL_STATE,
-              ...basicData,
+              name: basicData.name,
+              gender: basicData.gender as 'Male' | 'Female',
+              age: basicData.age as number,
+              title: basicData.title
           };
           
           // is_complete_profile defaults to false in DB, but we pass it effectively via lack of it or explicit false if we added it to interface
@@ -326,10 +329,9 @@ export default function Dashboard({ user }: DashboardProps) {
       if (formData.educationStream) eduString += ` - ${formData.educationStream}`;
       if (formData.educationDegree) eduString += ` (${formData.educationDegree})`;
 
-      // When saving Full Wizard, we set is_complete_profile = true
-      // Need to cast to any to include is_complete_profile if not in type
-      const finalData: any = { 
+      const finalData: UserProfile = { 
           ...formData, 
+          id: targetId,
           education: eduString, 
           avatar_url: finalAvatarUrl || '',
           is_complete_profile: true 
@@ -444,7 +446,7 @@ export default function Dashboard({ user }: DashboardProps) {
               </div>
 
               {/* Content */}
-              <div className="p-8 flex-grow">
+              <div key={(editingTargetId || user.id) + currentStep} className="p-8 flex-grow">
                 {renderEditSteps()}
               </div>
 

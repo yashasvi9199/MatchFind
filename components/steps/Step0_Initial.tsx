@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 type Gender = 'Male' | 'Female';
 type Title = string;
 
-interface Step0Data {
+export interface Step0Data {
     name: string;
     gender: Gender | '';
     age: number | '';
