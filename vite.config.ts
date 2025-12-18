@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
-      base: mode === 'production' ? '/MatchFind/' : '/',
+      base: mode === 'production' && !env.BUILD_FOR_ANDROID ? '/MatchFind/' : '/',
       server: {
         port: 3000,
         host: '0.0.0.0',

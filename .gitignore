@@ -30,3 +30,16 @@ dist-ssr
 .env.test.local
 .env.production.local
 .agent-persistence
+
+# Android / Capacitor
+*.jks
+*.keystore
+release-key.properties
+android/.gradle
+android/local.properties
+android/app/build
+android/build
+capacitor.config.json
+capacitor.config.ts.old
+node_modules/
+dist/

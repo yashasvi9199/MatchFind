@@ -10,9 +10,17 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "android:sync": "npx cap sync android",
+    "android:build:debug": "BUILD_FOR_ANDROID=true npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "android:build:release": "BUILD_FOR_ANDROID=true npm run build && npx cap sync android && cd android && ./gradlew assembleRelease",
+    "android:install:debug": "adb install android/app/build/outputs/apk/debug/app-debug.apk",
+    "android:install:release": "adb install android/app/build/outputs/apk/release/app-release.apk"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
     "@supabase/supabase-js": "^2.87.1",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
