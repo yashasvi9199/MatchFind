@@ -1,15 +1,15 @@
-
 import { ProfileData } from '../../types';
-import { User as UserIcon, MapPin, Calendar, Heart } from 'lucide-react';
+import { User as UserIcon, MapPin, Calendar, Heart, LogOut } from 'lucide-react';
 
 interface Props {
   data: ProfileData;
   avatarUrl: string | null;
   avatarFile: File | null;
   onEdit: () => void;
+  onLogout: () => void;
 }
 
-export default function ProfileView({ data, avatarUrl, avatarFile, onEdit }: Props) {
+export default function ProfileView({ data, avatarUrl, avatarFile, onEdit, onLogout }: Props) {
   const displayImage = avatarUrl || (avatarFile ? URL.createObjectURL(avatarFile) : null);
 
   return (
@@ -28,8 +28,8 @@ export default function ProfileView({ data, avatarUrl, avatarFile, onEdit }: Pro
           </div>
           
           <div className="pt-20 px-8 pb-8">
-             <div className="flex justify-between items-start">
-                <div>
+             <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                <div className="w-full md:w-auto">
                   <h1 className="text-3xl font-bold text-gray-800">{data.title} {data.name}</h1>
                   <p className="text-rose-600 font-medium text-lg mt-1">{data.occupation}</p>
                   <div className="flex gap-4 mt-3 text-sm text-gray-500">
@@ -37,7 +37,12 @@ export default function ProfileView({ data, avatarUrl, avatarFile, onEdit }: Pro
                       <span className="flex items-center gap-1"><Calendar className="w-4 h-4"/> {data.age} Years, {data.height}</span>
                   </div>
                 </div>
-                <button onClick={onEdit} className="bg-rose-50 text-rose-600 px-4 py-2 rounded-xl font-bold hover:bg-rose-100 transition-colors">Edit Profile</button>
+                <div className="flex flex-col gap-2 w-full md:w-auto relative z-20">
+                    <button onClick={onEdit} className="w-full md:w-auto bg-rose-50 text-rose-600 px-4 py-2 rounded-xl font-bold hover:bg-rose-100 transition-colors text-center">Edit Profile</button>
+                    <button onClick={onLogout} className="md:hidden flex items-center justify-center bg-gray-50 text-gray-600 px-4 py-2 rounded-xl font-bold hover:bg-gray-100 transition-colors w-full md:w-auto">
+                        <LogOut className="w-4 h-4 mr-2" /> Sign Out
+                    </button>
+                </div>
              </div>
 
              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
