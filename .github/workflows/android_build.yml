@@ -17,17 +17,13 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
-          cache-dependency-path: MatchFind/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: |
-          cd MatchFind
-          npm ci
+        run: npm ci
 
       - name: Build Web Project
-        run: |
-          cd MatchFind
-          npm run build
+        run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -44,20 +40,18 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Sync Capacitor
-        run: |
-          cd MatchFind
-          npx cap sync android
+        run: npx cap sync android
 
       - name: Build Android APK
         run: |
-          cd MatchFind/android
+          cd android
           ./gradlew assembleRelease
 
       - name: Sign APK
         id: sign_app
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: MatchFind/android/app/build/outputs/apk/release
+          releaseDirectory: android/app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
           alias: ${{ secrets.ANDROID_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
