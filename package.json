@@ -12,10 +12,10 @@
     "deploy": "gh-pages -d dist",
     "lint": "eslint .",
     "android:sync": "npx cap sync android",
-    "android:build:debug": "BUILD_FOR_ANDROID=true npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
-    "android:build:release": "BUILD_FOR_ANDROID=true npm run build && npx cap sync android && cd android && ./gradlew assembleRelease",
-    "android:install:debug": "adb install android/app/build/outputs/apk/debug/app-debug.apk",
-    "android:install:release": "adb install android/app/build/outputs/apk/release/app-release.apk"
+    "android-debug": "BUILD_FOR_ANDROID=true npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "android-release": "BUILD_FOR_ANDROID=true npm run build && npx cap sync android && cd android && ./gradlew assembleRelease",
+    "adb-debug": "adb install android/app/build/outputs/apk/debug/app-debug.apk",
+    "adb-release": "adb install android/app/build/outputs/apk/release/app-release.apk"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
