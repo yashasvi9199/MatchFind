@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import type { User } from '@supabase/supabase-js';
 import { uploadProfileImage, createProfile } from '../services/supabaseService';
@@ -6,7 +6,7 @@ import { ProfileData, FamilyMember, AppView, UserProfile } from '../types';
 import { STEPS } from '../constants/data';
 import { LogOut, Heart, ArrowRight, Save, SkipForward, ArrowLeft, XCircle, AlertCircle } from 'lucide-react';
 import { seedMockInteractions } from '../services/matchService';
-import { sanitizeInput } from '../utils/helpers';
+import { sanitizeInput, toTitleCase, toBioCase } from '../utils/helpers';
 
 // Steps Components
 import Step0_Initial, { Step0Data } from './steps/Step0_Initial';
@@ -145,17 +145,13 @@ export default function Dashboard({ user }: DashboardProps) {
     await supabase.auth.signOut();
   };
   
-  const handleEditProfile = (profile: UserProfile, forceView = false) => {
-      if (!forceView && !isProfileComplete && profile.id === user.id) {
-          // If editing own incomplete profile, we go to wizard
-      }
-
+  const handleEditProfile = (profile: UserProfile, stepIndex?: number | null) => {
       // Admin editing another user OR user editing self
       setFormData(profile);
       setAvatarUrl(profile.avatar_url || null);
       setEditingTargetId(profile.id === user.id ? null : profile.id);
       setIsEditingProfile(true);
-      setCurrentStep(0); // Start at Step 1 Basic Info
+      setCurrentStep(stepIndex ?? 0); 
       setHighestStepReached(STEPS.length - 1); 
   };
 
@@ -195,24 +191,33 @@ export default function Dashboard({ user }: DashboardProps) {
       }
   };
 
-  const updateField = (field: keyof ProfileData, value: string | number) => {
-    const sanitizedValue = typeof value === 'string' ? sanitizeInput(value) : value;
-    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
+  const updateField = useCallback((field: keyof ProfileData, value: string | number) => {
+    let finalValue = typeof value === 'string' ? sanitizeInput(value) : value;
+    if (typeof finalValue === 'string') {
+        if (field === 'bio') {
+            finalValue = toBioCase(finalValue);
+        } else if (['salary', 'height', 'weight', 'age', 'birthTime'].includes(field)) {
+            // Keep as is (numbers or specific formats)
+        } else {
+            finalValue = toTitleCase(finalValue);
+        }
+    }
+    setFormData(prev => ({ ...prev, [field]: finalValue }));
     setErrors(prev => prev.filter(e => e.field !== field));
-  };
+  }, []);
 
-  const updateFamily = (relation: 'father' | 'mother' | 'paternalSide', field: keyof FamilyMember, value: string) => {
-    const sanitized = sanitizeInput(value);
+  const updateFamily = useCallback((relation: 'father' | 'mother' | 'paternalSide', field: keyof FamilyMember, value: string) => {
+    const sanitized = toTitleCase(sanitizeInput(value));
     setFormData(prev => ({
       ...prev,
       [relation]: { ...prev[relation], [field]: sanitized }
     }));
     setErrors(prev => prev.filter(e => e.field !== `${relation}.${field}`));
-  };
+  }, []);
 
-  const setSiblings = (siblings: FamilyMember[]) => {
+  const setSiblings = useCallback((siblings: FamilyMember[]) => {
     setFormData(prev => ({ ...prev, siblings }));
-  };
+  }, []);
 
   // --- Validation Logic (Steps 1-8) ---
   const validateStep = (stepIndex: number): ValidationError[] => {
@@ -331,9 +336,35 @@ export default function Dashboard({ user }: DashboardProps) {
     }
   };
 
+  const trimProfileData = (data: ProfileData): ProfileData => {
+    const copy = { ...data };
+    (Object.keys(copy) as (keyof ProfileData)[]).forEach(key => {
+        const val = copy[key];
+        if (typeof val === 'string') {
+            (copy as any)[key] = val.trim();
+        }
+    });
+    // Also trim family members
+    const trimMember = (m: FamilyMember) => ({
+        ...m,
+        name: m.name ? m.name.trim() : '',
+        occupation: m.occupation ? m.occupation.trim() : '',
+        gotra: m.gotra ? m.gotra.trim() : '',
+        caste: m.caste ? m.caste.trim() : '',
+        designation: m.designation ? m.designation.trim() : '',
+        company_name: m.company_name ? m.company_name.trim() : ''
+    });
+    copy.father = trimMember(copy.father);
+    copy.mother = trimMember(copy.mother);
+    copy.paternalSide = trimMember(copy.paternalSide);
+    copy.siblings = copy.siblings.map(trimMember);
+    return copy;
+  };
+
   const handleSubmit = async () => {
     setIsSaving(true);
     try {
+      const trimmedData = trimProfileData(formData);
       let finalAvatarUrl = avatarUrl;
       const targetId = editingTargetId || user.id;
 
@@ -350,7 +381,7 @@ export default function Dashboard({ user }: DashboardProps) {
       if (formData.educationDegree) eduString += ` (${formData.educationDegree})`;
 
       const finalData: UserProfile = { 
-          ...formData, 
+          ...trimmedData, 
           id: targetId,
           education: eduString, 
           avatar_url: finalAvatarUrl || '',
@@ -394,7 +425,22 @@ export default function Dashboard({ user }: DashboardProps) {
   };
 
   const renderMainContent = () => {
-    if (isLoadingProfile) return <div className="text-center py-20 text-gray-500">Loading...</div>;
+    if (isLoadingProfile) {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
+                <div className="flex items-center gap-2 h-16 mb-6">
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave [animation-delay:-0.45s]"></div>
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave [animation-delay:-0.3s]"></div>
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave [animation-delay:-0.15s]"></div>
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave"></div>
+                </div>
+                <div className="space-y-2 text-center">
+                    <p className="text-gray-800 font-extrabold text-xl tracking-tight">Finding Rishtey...</p>
+                    <p className="text-gray-400 text-sm animate-pulse">Matching profiles based on your preferences</p>
+                </div>
+            </div>
+        );
+    }
 
     // STEP 0: No Profile -> Show Step 0 Form
     if (!hasProfile) {
@@ -560,7 +606,7 @@ export default function Dashboard({ user }: DashboardProps) {
     };
 
     switch(currentView) {
-        case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} onLogout={handleLogout} {...commonViewProps} />;
+        case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={(step?: number) => handleEditProfile(userProfile, step)} onLogout={handleLogout} {...commonViewProps} />;
         case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} {...commonViewProps} />;
         case 'MATCH': return <MatchView currentUser={userProfile} {...commonViewProps} />;
         case 'SEARCH': return <SearchView currentUser={userProfile} />; 

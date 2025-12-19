@@ -4,6 +4,8 @@ export interface FamilyMember {
   gotra: string;
   caste: string;
   occupation: string;
+  designation?: string;
+  company_name?: string;
 }
 
 export interface ProfileData {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ProfileData } from '../../types';
 import { Input, Label, SectionTitle } from '../common/FormComponents';
 import { X, CheckCircle2 } from 'lucide-react';
-import { toTitleCasePreserveSpaces } from '../../utils/helpers';
+import { toTitleCase } from '../../utils/helpers';
 
 interface Props {
   data: ProfileData;
@@ -14,7 +14,7 @@ export default function Step6_Health({ data, setHealthIssues }: Props) {
 
   const handleHealthIssueInput = (val: string) => {
     // Apply title case while preserving trailing spaces
-    setNewHealthIssue(toTitleCasePreserveSpaces(val));
+    setNewHealthIssue(toTitleCase(val));
   };
 
   const addHealthIssue = () => {

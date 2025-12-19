@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ProfileData } from '../../types';
 import { Input, Label, SectionTitle } from '../common/FormComponents';
 import { X } from 'lucide-react';
-import { sanitizeInput, toTitleCasePreserveSpaces } from '../../utils/helpers';
+import { sanitizeInput, toTitleCase } from '../../utils/helpers';
 
 interface Props {
   data: ProfileData;
@@ -16,7 +16,7 @@ export default function Step7_Preferences({ data, update, setExpectations }: Pro
 
   const handleExpectationInput = (val: string) => {
     // Apply title case while preserving trailing spaces
-    setNewExpectation(toTitleCasePreserveSpaces(val));
+    setNewExpectation(toTitleCase(val));
   };
 
   const addExpectation = (text: string) => {

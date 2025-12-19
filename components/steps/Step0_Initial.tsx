@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';
 import { TITLES } from '../../constants/data';
 import { ArrowRight } from 'lucide-react';
+import { toTitleCase } from '../../utils/helpers';
 
 type Gender = 'Male' | 'Female';
 type Title = string;
@@ -59,7 +60,7 @@ export default function Step0_Initial({ onSubmit, isSubmitting }: Props) {
                         <Label>Full Name</Label>
                         <Input 
                             value={data.name} 
-                            onChange={e => setData({...data, name: e.target.value})} 
+                            onChange={e => setData({...data, name: toTitleCase(e.target.value)})} 
                             placeholder="Enter full name"
                         />
                     </div>

@@ -31,13 +31,14 @@ export default function Step1_BasicInfo({ data, update }: Props) {
     const newParts = { ...nameParts, [field]: sanitized };
     setNameParts(newParts);
     
-    // Update parent with trimmed parts
-    const full = [newParts.first.trim(), newParts.middle.trim(), newParts.last.trim()].filter(Boolean).join(' ');
+    // Update parent with parts. Dashboard updateField handles toTitleCase and no-trim-on-change.
+    const full = [newParts.first, newParts.middle, newParts.last].filter(Boolean).join(' ');
     update('name', full);
   };
 
   const handleBlurName = (field: 'first' | 'middle' | 'last') => {
-      // 2. Trim names for start and end space on blur
+      // Still good to clean up local state on blur if needed, but not strictly required
+      // as Dashboard will trim on submit.
       setNameParts(prev => ({ ...prev, [field]: prev[field].trim() }));
   };
 

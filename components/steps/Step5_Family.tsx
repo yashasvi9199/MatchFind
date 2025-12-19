@@ -4,7 +4,7 @@ import { TITLES, CASTES, GOTRA_MAP } from '../../constants/data';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';
 import Autocomplete from '../common/Autocomplete';
 import { Users, Plus, Trash2, Check, Pencil, X } from 'lucide-react';
-import { sanitizeInput, toTitleCasePreserveSpaces } from '../../utils/helpers';
+import { sanitizeInput, toTitleCase } from '../../utils/helpers';
 
 interface Props {
   data: ProfileData;
@@ -38,7 +38,7 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
     let sanitized = sanitizeInput(value);
     // Apply validation for Name and Occupation - use Title Case
     if (field === 'name' || field === 'occupation') {
-        sanitized = toTitleCasePreserveSpaces(sanitized);
+        sanitized = toTitleCase(sanitized);
     }
     const updated = [...siblings];
     updated[index] = { ...updated[index], [field]: sanitized };
@@ -62,7 +62,7 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
   // Use shared utility for title case that preserves trailing spaces
 
   const handleFamilyText = (relation: 'father' | 'mother' | 'paternalSide', field: keyof FamilyMember, val: string) => {
-      const clean = toTitleCasePreserveSpaces(val);
+      const clean = toTitleCase(val);
       updateFamily(relation, field, clean);
   };
 

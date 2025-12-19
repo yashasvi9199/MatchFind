@@ -27,9 +27,9 @@ export default function Step3_Location({ data, update }: Props) {
   const isIndiaNative = data.nativeCountry?.toUpperCase() === 'INDIA';
   const isIndiaCurrent = data.currentCountry?.toUpperCase() === 'INDIA';
 
-  // Helper for Alphabets Only + Uppercase
+  // Helper for Alphabets Only
   const handleAlphaInput = (field: keyof ProfileData, val: string) => {
-    const clean = val.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
+    const clean = val.replace(/[^a-zA-Z\s]/g, '');
     update(field, clean);
   };
 
