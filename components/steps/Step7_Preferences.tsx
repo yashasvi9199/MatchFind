@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ProfileData } from '../../types';
 import { Input, Label, SectionTitle } from '../common/FormComponents';
 import { X } from 'lucide-react';
-import { sanitizeInput } from '../../utils/helpers';
+import { sanitizeInput, toTitleCasePreserveSpaces } from '../../utils/helpers';
 
 interface Props {
   data: ProfileData;
@@ -13,6 +13,11 @@ interface Props {
 export default function Step7_Preferences({ data, update, setExpectations }: Props) {
   const [newExpectation, setNewExpectation] = useState('');
   const suggestText = data.gender === 'Male' ? "Housewife" : "Househusband";
+
+  const handleExpectationInput = (val: string) => {
+    // Apply title case while preserving trailing spaces
+    setNewExpectation(toTitleCasePreserveSpaces(val));
+  };
 
   const addExpectation = (text: string) => {
     const sanitized = sanitizeInput(text);
@@ -64,7 +69,7 @@ export default function Step7_Preferences({ data, update, setExpectations }: Pro
             <div className="flex gap-2 mb-3">
                <Input 
                   value={newExpectation} 
-                  onChange={e => setNewExpectation(e.target.value)} 
+                  onChange={e => handleExpectationInput(e.target.value)} 
                   placeholder="E.g. Should be family oriented..."
                   onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addExpectation(newExpectation))}
                 />
