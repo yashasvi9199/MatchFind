@@ -2,28 +2,47 @@
 
 ## Authentication
 
-- fix: Supabase integration for signup/login
-- feature: Email confirmation redirect logic
-- feature: Admin skip auth for convenience
+- Supabase integration for signup/login
+- Email confirmation redirect logic
+- Admin skip auth for convenience
 
 ## Dashboard & Navigation
 
-- feature: Floating navigation bar
-- feature: Dashboard with MatchView, RishteyView, and SearchView
-- feature: Responsive mobile layout
+- Floating navigation bar (Profile → Rishtey → Search → Matches)
+- Always-visible labels on navigation buttons
+- Dashboard with MatchView, RishteyView, and SearchView
+- Responsive mobile layout
 
 ## Profile Management
 
-- feature: Basic Info form with height and blood group fields
-- change: Height input auto-formatting (x.y to x.0y)
+- Basic Info form with height (.ft suffix) and blood group fields
+- Height input auto-formatting (x.y to x.0y)
+- Profile page displays all details (email, phone, education, location, family)
+- Circular profile pictures with fallback avatar
+
+## Education & Career
+
+- Job/Business occupation type selection with radio buttons
+- Conditional fields: Company Name + Designation (Job) OR Business Name + Category (Business)
+- Dynamic salary/turnover label based on occupation type
+- Computer Science added to education streams
+
+## Form Components
+
+- Autocomplete with keyboard navigation (Tab/Arrow keys)
+- TimePicker with explicit Save button
+- Searchable state selection for Indian states
+- Title Case formatting for name inputs
+
+## Matching & Connections
+
+- You Liked / Liked You / Matches / Rejected tabs
+- Public profile modal with ESC key close
+- All profile details visible (no hidden constraints)
+- Backend-driven search and match discovery
 
 ## Mobile Support
 
-- feature: Capacitor integration for Android
-- feature: Optimized mobile UI (Sign out relocated to profile)
-- change: Performance optimizations for mobile animations
-
-## Search & Matching
-
-- feature: Backend-driven search functionality
-- feature: Potential match discovery logic
+- Capacitor integration for Android
+- Optimized mobile UI (Sign out relocated to profile)
+- Performance optimizations for mobile animations
