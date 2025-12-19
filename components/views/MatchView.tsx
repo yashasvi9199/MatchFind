@@ -8,11 +8,12 @@ interface Props {
   currentUser: UserProfile;
   isProfileComplete?: boolean;
   onRestrictedAction?: () => void;
+  onViewFullProfile?: (profile: UserProfile) => void;
 }
 
 type Tab = 'LIKED' | 'LIKED_BY' | 'MATCHES' | 'REJECTED';
 
-export default function MatchView({ currentUser }: Props) {
+export default function MatchView({ currentUser, onViewFullProfile }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('LIKED');
   const [data, setData] = useState<UserProfile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
@@ -112,6 +113,7 @@ export default function MatchView({ currentUser }: Props) {
           profile={selectedProfile} 
           onClose={() => setSelectedProfile(null)} 
           isMatch={activeTab === 'MATCHES'}
+          onViewFullProfile={() => onViewFullProfile?.(selectedProfile)}
         />
       )}
     </div>
@@ -130,6 +132,6 @@ const TabButton = ({ active, onClick, label, icon }: TabButtonProps) => (
       onClick={onClick}
       className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-bold transition-all min-w-[80px] ${active ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
     >
-      {icon} <span className="hidden sm:inline">{label}</span>
+      {icon} <span>{label}</span>
     </button>
 );
