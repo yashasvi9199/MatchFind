@@ -6,6 +6,11 @@
 - Email confirmation redirect logic
 - Admin skip auth for convenience
 - Android App Download banner on Login page
+- Interactive "lift" animations on input icons (Email, Phone, Password)
+- Phone number auto-formatting (+91 prefix) and strict validation
+- Password visibility toggles (Eye/EyeOff) and Confirm Password field
+- Real-time password mismatch validation with red border feedback
+- "Forgot Password" link integrated into password input block
 
 ## Dashboard & Navigation
 

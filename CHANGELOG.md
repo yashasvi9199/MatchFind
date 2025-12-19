@@ -2,6 +2,14 @@
 
 # version 2.0
 
+## 2.0.8
+
+- feature: Added playful "lift" animation to input icons on focus for Email, Phone, and Password.
+- feature: Enhanced phone input with auto-formatting (+91 prefix) and strict numeric validation.
+- feature: Added "Confirm Password" field to signup flow and password visibility toggles (Eye/EyeOff).
+- feature: Revamped password validation with immediate client-side feedback and real-time visual separation (red border) for mismatches.
+- style: Relocated "Forgot Password" link to a more intuitive position inside the password field block.
+
 ## 2.0.7
 
 - feature: Replaced static Android download banner with a premium "Get App" popup modal.

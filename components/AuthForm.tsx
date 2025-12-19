@@ -1,7 +1,7 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { AuthMode, LoginMethod } from '../types';
-import { Mail, KeyRound, Loader2, ArrowRight, Heart, Phone, Lock } from 'lucide-react';
+import { Mail, KeyRound, Loader2, ArrowRight, Heart, Phone, Lock, Eye, EyeOff } from 'lucide-react';
 import AppDownloadModal from './common/AppDownloadModal';
 import { Input, Label } from './common/FormComponents';
 import CoupleAnimation from './CoupleAnimation';
@@ -13,8 +13,12 @@ export default function AuthForm() {
   // Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -89,6 +93,11 @@ export default function AuthForm() {
         }
         if (password.length < 6) {
             setError('Password must be at least 6 characters');
+            setLoading(false);
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
             setLoading(false);
             return;
         }
@@ -243,7 +252,7 @@ export default function AuthForm() {
                 <Label className="text-gray-700 font-semibold mb-1.5 block">Email Address</Label>
                 <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-rose-600 transition-colors" />
+                    <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-rose-600 transition-all duration-300 group-focus-within:-translate-y-1" />
                     </div>
                     <Input
                     type="email"
@@ -263,13 +272,52 @@ export default function AuthForm() {
                             <Label className="text-gray-700 font-semibold mb-1.5 block">Phone Number</Label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <Phone className="h-5 w-5 text-gray-400 group-focus-within:text-rose-600 transition-colors" />
+                                    <Phone className="h-5 w-5 text-gray-400 group-focus-within:text-rose-600 transition-all duration-300 group-focus-within:-translate-y-1" />
                                 </div>
                                 <Input
                                     type="tel"
                                     required
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
+                                    onChange={(e) => {
+                                      let val = e.target.value;
+                                      // If the user clears strictly the prefix, or everything, let them clear it.
+                                      // But if they type a number, ensure prefix is there.
+                                      // Simple logic: Strip non-digits. If length > 0, ensure prefix.
+                                      
+                                      // Remove all non-digits to start fresh (ignoring + for a moment)
+                                      const digits = val.replace(/\D/g, '');
+                                      
+                                      // If empty, just set empty (allows full clear)
+                                      if (!digits) {
+                                          setPhone('');
+                                          return;
+                                      }
+
+                                      // If we have digits, we want to enforce +91 prefix
+                                      // Check if the current raw input (val) actually starts with +91
+                                      // If not, we re-add it.
+                                      
+                                      // Actually, easier approach:
+                                      // 1. Strip everything that isn't a digit.
+                                      // 2. If the user was trying to delete the prefix (e.g. they had +91 9, and hit backspace to get +91),
+                                      //    we might end up with just "91" in digits.
+                                      //    But we want to support "As soon as user start typing".
+                                      
+                                      // Let's look at the digits.
+                                      // "91" from the prefix might be there if they didn't delete it.
+                                      
+                                      let coreNumber = digits;
+                                      if (coreNumber.startsWith('91')) {
+                                          coreNumber = coreNumber.substring(2);
+                                      }
+                                      
+                                      // Limit to 10 digits
+                                      if (coreNumber.length > 10) {
+                                          coreNumber = coreNumber.substring(0, 10);
+                                      }
+                                      
+                                      setPhone('+91 ' + coreNumber);
+                                    }}
                                     className="pl-11 py-3 bg-gray-50 border-gray-200 focus:bg-white transition-all text-base"
                                     placeholder="+91 9876543210"
                                 />
@@ -283,20 +331,61 @@ export default function AuthForm() {
                     <div>
                         <div className="flex justify-between items-center mb-1.5">
                             <Label className="text-gray-700 font-semibold">{mode === 'SIGNUP' ? 'Create Password' : 'Password'}</Label>
-                            {mode === 'LOGIN' && <a href="#" className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline">Forgot?</a>}
                         </div>
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-rose-600 transition-colors" />
+                                <Lock className={`h-5 w-5 group-focus-within:text-rose-600 transition-all duration-300 group-focus-within:-translate-y-1 ${mode === 'SIGNUP' && confirmPassword && password !== confirmPassword ? 'text-red-400' : 'text-gray-400'}`} />
                             </div>
                             <Input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="pl-11 py-3 bg-gray-50 border-gray-200 focus:bg-white transition-all text-base"
+                                className={`pl-11 pr-10 py-3 bg-gray-50 border-gray-200 focus:bg-white transition-all text-base ${mode === 'SIGNUP' && confirmPassword && password !== confirmPassword ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : ''}`}
                                 placeholder="••••••••"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                            >
+                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        {mode === 'LOGIN' && (
+                             <div className="flex justify-end mt-1.5">
+                                <a href="#" className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline">Forgot Password?</a>
+                             </div>
+                        )}
+                         {mode === 'SIGNUP' && confirmPassword && password !== confirmPassword && (
+                            <p className="text-xs text-red-500 mt-1 ml-1">Passwords do not match</p>
+                        )}
+                    </div>
+                )}
+                
+                {/* Confirm Password (Signup only) */}
+                {mode === 'SIGNUP' && (
+                    <div>
+                        <Label className="text-gray-700 font-semibold mb-1.5 block">Confirm Password</Label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <Lock className={`h-5 w-5 group-focus-within:text-rose-600 transition-all duration-300 group-focus-within:-translate-y-1 ${confirmPassword && password !== confirmPassword ? 'text-red-400' : 'text-gray-400'}`} />
+                            </div>
+                            <Input
+                                type={showConfirmPassword ? "text" : "password"}
+                                required
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className={`pl-11 pr-10 py-3 bg-gray-50 border-gray-200 focus:bg-white transition-all text-base ${confirmPassword && password !== confirmPassword ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : ''}`}
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                            >
+                                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
                         </div>
                     </div>
                 )}
