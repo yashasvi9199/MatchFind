@@ -560,7 +560,7 @@ export default function Dashboard({ user }: DashboardProps) {
     };
 
     switch(currentView) {
-        case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} onLogout={handleLogout} />;
+        case 'PROFILE': return <ProfileView data={formData} avatarUrl={avatarUrl} avatarFile={avatarFile} onEdit={() => setIsEditingProfile(true)} onLogout={handleLogout} {...commonViewProps} />;
         case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} {...commonViewProps} />;
         case 'MATCH': return <MatchView currentUser={userProfile} {...commonViewProps} />;
         case 'SEARCH': return <SearchView currentUser={userProfile} />; 
