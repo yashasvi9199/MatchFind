@@ -39,7 +39,7 @@ const INITIAL_STATE: ProfileData = {
   nativeCountry: 'India', nativeState: '', nativeCity: '',
   currentCountry: 'India', currentState: '', currentCity: '',
   educationLevel: '', educationStream: '', educationDegree: '', education: '',
-  occupation: '', salary: '',
+  occupation: '', occupation_type: '', company_name: '', designation: '', business_name: '', business_category: '', salary: '',
   father: { ...INITIAL_FAMILY_MEMBER, title: 'Mr' },
   mother: { ...INITIAL_FAMILY_MEMBER, title: 'Mrs' },
   paternalSide: { ...INITIAL_FAMILY_MEMBER, title: 'Mr' }, 
@@ -427,13 +427,13 @@ export default function Dashboard({ user }: DashboardProps) {
                 </div>
                 {/* Cancel Button if editing other */}
                 {editingTargetId && (
-                   <button onClick={() => { setIsEditingProfile(false); setEditingTargetId(null); setCurrentView('RISHTEY'); }} className="text-sm text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg">
+                   <button onClick={() => { setIsEditingProfile(false); setEditingTargetId(null); setCurrentView('PROFILE'); }} className="text-sm text-red-600 font-bold bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg border border-red-200 transition-colors">
                      Cancel Edit
                    </button>
                 )}
-                 {/* Cancel if editing self but has profile (Cancel completes nothing but goes back) */}
+                 {/* Cancel if editing self - goes back to PROFILE */}
                  {!editingTargetId && (
-                    <button onClick={() => { setIsEditingProfile(false); setCurrentView('RISHTEY'); }} className="text-sm text-gray-400 hover:text-gray-600 px-3">
+                    <button onClick={() => { setIsEditingProfile(false); setCurrentView('PROFILE'); }} className="text-sm text-red-500 font-bold bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg border border-red-100 transition-colors">
                         Cancel
                     </button>
                  )}
