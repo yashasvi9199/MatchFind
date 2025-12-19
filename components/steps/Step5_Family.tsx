@@ -32,11 +32,16 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
     setEditingSiblingIndex(siblings.length);
   };
 
+  // Title Case Helper for siblings
+  const toTitleCaseSibling = (str: string) => {
+    return str.replace(/[^a-zA-Z\s]/g, '').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+  };
+
   const updateSibling = (index: number, field: keyof FamilyMember, value: string) => {
     let sanitized = sanitizeInput(value);
-    // Apply validation for Name and Occupation
+    // Apply validation for Name and Occupation - use Title Case
     if (field === 'name' || field === 'occupation') {
-        sanitized = sanitized.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
+        sanitized = toTitleCaseSibling(sanitized);
     }
     const updated = [...siblings];
     updated[index] = { ...updated[index], [field]: sanitized };
@@ -57,8 +62,13 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
     setEditingSiblingIndex(null);
   };
 
+  // Title Case Helper: Capitalizes first letter of each word
+  const toTitleCase = (str: string) => {
+    return str.replace(/[^a-zA-Z\s]/g, '').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+  };
+
   const handleFamilyText = (relation: 'father' | 'mother' | 'paternalSide', field: keyof FamilyMember, val: string) => {
-      const clean = val.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
+      const clean = toTitleCase(val);
       updateFamily(relation, field, clean);
   };
 
@@ -66,6 +76,7 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
     const relCaste = data[relation].caste;
     const relGotras = relCaste ? (GOTRA_MAP[relCaste] || []) : [];
     const isNanihaal = relation === 'paternalSide';
+    const showCasteGotra = isNanihaal; // Only show caste/gotra for Nanihaal (maternal side)
     
     return (
       <div className="p-5 bg-orange-50/50 rounded-2xl border border-orange-100 mb-6 shadow-sm hover:shadow-md transition-shadow">
@@ -83,7 +94,7 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
                   {TITLES.map(t => <option key={t} value={t}>{t}</option>)}
                 </Select>
               </div>
-              <div className="col-span-8 sm:col-span-4">
+              <div className="col-span-8 sm:col-span-10">
                 <Label className="text-xs text-gray-500 uppercase">Name *</Label>
                 <Input 
                     className="py-2 text-sm" 
@@ -95,30 +106,36 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
             </>
           )}
           
-          <div className={`col-span-6 ${isNanihaal ? 'sm:col-span-6' : 'sm:col-span-3'}`}>
-             <Autocomplete 
-                label="Caste"
-                className="text-xs"
-                placeholder="Select Caste"
-                value={data[relation].caste}
-                options={CASTES}
-                onChange={val => {
-                    updateFamily(relation, 'caste', val);
-                    updateFamily(relation, 'gotra', '');
-                }}
-             />
-          </div>
-          <div className={`col-span-6 ${isNanihaal ? 'sm:col-span-6' : 'sm:col-span-3'}`}>
-             <Autocomplete
-                label="Gotra"
-                className="text-xs"
-                placeholder="Select Gotra"
-                value={data[relation].gotra}
-                options={relGotras}
-                onChange={val => updateFamily(relation, 'gotra', val)}
-                disabled={!relCaste}
-             />
-          </div>
+          {/* Only show Caste/Gotra for Nanihaal (Maternal Side) */}
+          {showCasteGotra && (
+            <>
+              <div className="col-span-6">
+                 <Autocomplete 
+                    label="Caste"
+                    className="text-xs"
+                    placeholder="Select Caste"
+                    value={data[relation].caste}
+                    options={CASTES}
+                    onChange={val => {
+                        updateFamily(relation, 'caste', val);
+                        updateFamily(relation, 'gotra', '');
+                    }}
+                 />
+              </div>
+              <div className="col-span-6">
+                 <Autocomplete
+                    label="Gotra"
+                    className="text-xs"
+                    placeholder="Select Gotra"
+                    value={data[relation].gotra}
+                    options={relGotras}
+                    onChange={val => updateFamily(relation, 'gotra', val)}
+                    disabled={!relCaste}
+                 />
+              </div>
+            </>
+          )}
+          
           {!isNanihaal && (
             <div className="col-span-12">
                 <Label className="text-xs text-gray-500 uppercase">Occupation / Details *</Label>
