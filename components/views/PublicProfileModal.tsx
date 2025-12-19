@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { UserProfile } from '../../types';
-import { X, Heart, ThumbsDown, Briefcase, MapPin, Calendar, Ruler, Building2, Store, GraduationCap, Users, Utensils } from 'lucide-react';
+import { X, Heart, ThumbsDown, Briefcase, MapPinHouse, Calendar, MoveVertical, Building2, Store, GraduationCap, Users, Utensils } from 'lucide-react';
 
 interface Props {
   profile: UserProfile;
@@ -9,9 +9,10 @@ interface Props {
   onAction?: (type: 'INTERESTED' | 'REMOVED') => void;
   isMatch?: boolean;
   showFullDetails?: boolean;
+  onViewFullProfile?: () => void;
 }
 
-export default function PublicProfileModal({ profile, onClose, onAction, isMatch = false, showFullDetails = false }: Props) {
+export default function PublicProfileModal({ profile, onClose, onAction, isMatch = false, showFullDetails = false, onViewFullProfile }: Props) {
   
   // ESC key handler
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -76,9 +77,9 @@ export default function PublicProfileModal({ profile, onClose, onAction, isMatch
             {/* Quick Stats with Icons */}
             <div className="flex flex-wrap gap-3">
                <Badge color="rose" icon={<Calendar className="w-3 h-3"/>}>{profile.age} Years</Badge>
-               <Badge color="blue" icon={<Ruler className="w-3 h-3"/>}>{profile.height} ft</Badge>
+               <Badge color="blue" icon={<MoveVertical className="w-3 h-3"/>}>{profile.height} ft</Badge>
                <Badge color="orange">{profile.caste}</Badge>
-               <Badge color="purple" icon={<MapPin className="w-3 h-3"/>}>{profile.currentCity}</Badge>
+               <Badge color="purple" icon={<MapPinHouse className="w-3 h-3"/>}>{profile.currentCity}</Badge>
             </div>
 
             {/* About */}
@@ -165,8 +166,51 @@ export default function PublicProfileModal({ profile, onClose, onAction, isMatch
           </div>
         </div>
 
-        {/* Sticky Action Buttons */}
-        {onAction && (
+        {/* Footer / Actions */}
+        <div className="p-6 border-t border-gray-100 flex gap-4 bg-gray-50 rounded-b-3xl">
+            {onViewFullProfile ? (
+                 <button 
+                    onClick={onViewFullProfile}
+                    className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+                 >
+                    View Full Profile
+                 </button>
+            ): (
+                <>
+                    <button 
+                        onClick={() => onAction?.('REMOVED')}
+                        className="flex-1 bg-white text-gray-500 py-3 rounded-xl font-bold border-2 border-gray-200 hover:border-gray-300 hover:text-gray-700 transition-colors"
+                    >
+                        Skip
+                    </button>
+                    <button 
+                        onClick={() => onAction?.('INTERESTED')}
+                        className="flex-1 bg-gradient-to-r from-rose-500 to-orange-500 text-white py-3 rounded-xl font-bold hover:from-rose-600 hover:to-orange-600 transition-all shadow-lg shadow-rose-200"
+                    >
+                        I'm Interested
+                    </button>
+                </>
+            )}
+        </div>
+
+        {/* Sticky Action Buttons for Match View (only if onViewFullProfile is NOT present / or combined) */}
+        {/* If we have View Full Profile, maybe we don't want floating buttons? Or we do? 
+            The requirement says "Add button to view full profile page". 
+            Let's keep Floating Buttons only if onViewFullProfile is NOT present (i.e. minimal view), 
+            OR if user wants both. 
+            Actually, RishteyView passes onAction AND onViewFullProfile. 
+            So we should probably show both if possible, or View Full Profile takes precedence in the footer, 
+            and Actions can be floating? 
+            Let's stick to the Footer button logic for View Full Profile as implemented above.
+            And maybe hide floating buttons if View Full Profile is available to avoid clutter?
+            No, the user might want to quick-action.
+        */}
+        
+        {/* Re-adding floating buttons if onAction is present AND onViewFullProfile is NOT present (to avoid double actions) 
+            OR keep them? 
+            Let's just keep the floating buttons logic as is, but maybe adjust position.
+        */}
+        {onAction && !onViewFullProfile && (
           <div className="absolute bottom-6 w-full flex justify-center gap-8 z-30 pointer-events-none">
              <button 
                onClick={() => { onAction('REMOVED'); onClose(); }}
