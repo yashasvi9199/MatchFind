@@ -2,6 +2,23 @@
 
 # version 2.0
 
+## 2.0.6
+
+- feature: Enhanced Profile UI with optimized layout (Health & Lifestyle section repositioned).
+- feature: Dynamic gender-based color themes (Blue/Cyan for Male, Rose/Orange for Female).
+- feature: Standardized 'SquarePen' edit icons across the entire profile view for consistency.
+- fix: Significant performance optimization in ProfileView and FullProfileView by stabilizing component definitions.
+- style: Refined Hero section aesthetics with improved spacing and visual layering.
+
+## 2.0.5
+
+- feature: Redesigned ProfileView with a premium, organized layout and better visual hierarchy.
+- feature: Direct step navigation for profile editing (clicking "edit" icon goes directly to the relevant step).
+- feature: Global input validation and formatting (Title Case, no-trim-on-change) for smoother professional profiles.
+- fix: Resolved the space issues in input fields by removing premature trimming.
+- fix: Implemented centralized trim-on-submit logic in Dashboard.tsx.
+- change: Updated all profile editing steps to remove redundant formatting logic.
+
 ## 2.0.4
 
 - feature: Custom "Wave" Spinner in RishteyView with 2s minimum duration for smooth UX

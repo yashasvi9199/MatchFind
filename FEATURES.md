@@ -23,8 +23,9 @@
 - Circular profile pictures with fallback avatar
 - Image pop-out viewer for high-resolution profile pictures
 - Full Profile View for potential matches
-- Partial field editing with "square-pen" shortcut icons
+- Partial field editing with consistent "square-pen" shortcut icons
 - Integrated "Complete Profile" restriction for partial edits
+- Dynamic gender-based UI theming (Male: Blue/Cyan, Female: Rose/Orange)
 
 ## Education & Career
 
