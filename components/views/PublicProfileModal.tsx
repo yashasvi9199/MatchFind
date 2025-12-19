@@ -96,7 +96,7 @@ export default function PublicProfileModal({ profile, onClose, onAction, isMatch
                   <InfoRow label="Gotra" value={profile.gotra || 'N/A'} />
                   <InfoRow label="Skin Color" value={profile.skinColor || 'N/A'} />
                   <InfoRow label="Diet" value={profile.diet || 'N/A'} icon={<Utensils className="w-3 h-3"/>} />
-                  <InfoRow label="Weight" value={`${profile.weight} kg` || 'N/A'} />
+                  <InfoRow label="Weight" value={profile.weight ? `${profile.weight} kg` : 'N/A'} />
                </div>
                <div className="space-y-4">
                   <h4 className="font-bold text-gray-400 uppercase text-xs tracking-wider flex items-center gap-2">
