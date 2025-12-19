@@ -33,26 +33,26 @@ export default function FloatingNav({ currentView, setView, isProfileComplete, o
   };
 
   const menuItems = [
-    { id: 'MATCH', icon: <HeartHandshake className="w-5 h-5" />, label: 'Matches', color: 'bg-green-500' },
-    { id: 'SEARCH', icon: <Search className="w-5 h-5" />, label: 'Search', color: 'bg-blue-500' },
-    { id: 'RISHTEY', icon: <Users className="w-5 h-5" />, label: 'Rishtey', color: 'bg-rose-500' },
     { id: 'PROFILE', icon: <User className="w-5 h-5" />, label: 'Profile', color: 'bg-orange-500' },
+    { id: 'RISHTEY', icon: <Users className="w-5 h-5" />, label: 'Rishtey', color: 'bg-rose-500' },
+    { id: 'SEARCH', icon: <Search className="w-5 h-5" />, label: 'Search', color: 'bg-blue-500' },
+    { id: 'MATCH', icon: <HeartHandshake className="w-5 h-5" />, label: 'Matches', color: 'bg-green-500' },
   ];
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-8 right-8 z-50 flex flex-col items-center gap-3">
       {/* Menu Items Stack */}
-      <div className={`flex flex-col gap-3 transition-all duration-300 ease-out origin-bottom ${isOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-50 pointer-events-none'}`}>
+      <div className={`flex flex-col items-center gap-3 transition-all duration-300 ease-out origin-bottom ${isOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-50 pointer-events-none'}`}>
         {menuItems.map((item, index) => {
           const active = isActive(item.id as AppView);
           return (
             <button
               key={item.id}
               onClick={() => handleNav(item.id as AppView)}
-              className={`flex items-center justify-end gap-3 group transition-transform duration-300 ${active ? 'scale-110 mr-2' : ''}`}
+              className={`flex items-center gap-3 group transition-transform duration-300 ${active ? 'scale-110' : ''}`}
               style={{ transitionDelay: `${index * 50}ms` }}
             >
-              <span className={`bg-white text-gray-700 text-xs font-bold px-2 py-1 rounded-md shadow-md transition-opacity whitespace-nowrap ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+              <span className={`bg-white text-gray-700 text-xs font-bold px-2 py-1 rounded-md shadow-md whitespace-nowrap ${active ? 'ring-2 ring-rose-300' : ''}`}>
                 {item.label}
               </span>
               <div className={`${item.color} text-white p-3 rounded-full shadow-lg hover:scale-110 transition-transform ${active ? 'ring-4 ring-white ring-opacity-50' : ''}`}>
