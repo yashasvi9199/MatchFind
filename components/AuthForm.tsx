@@ -1,7 +1,8 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { AuthMode, LoginMethod } from '../types';
-import { Mail, KeyRound, Loader2, ArrowRight, Heart, Phone, Lock, Smartphone, Download } from 'lucide-react';
+import { Mail, KeyRound, Loader2, ArrowRight, Heart, Phone, Lock } from 'lucide-react';
+import AppDownloadModal from './common/AppDownloadModal';
 import { Input, Label } from './common/FormComponents';
 import CoupleAnimation from './CoupleAnimation';
 
@@ -24,8 +25,7 @@ export default function AuthForm() {
   const getIsMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
   const [isMobile, setIsMobile] = useState(getIsMobile);
   
-  // Android APK URL state
-  const [androidApkUrl, setAndroidApkUrl] = useState<string>('');
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,25 +36,7 @@ export default function AuthForm() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch latest release APK URL
-  useEffect(() => {
-    const fetchLatestRelease = async () => {
-      try {
-        const res = await fetch('https://api.github.com/repos/yashasvi9199/MatchFind/releases/latest');
-        if (res.ok) {
-          const data = await res.json();
-          // Find the APK asset
-          const apkAsset = data.assets?.find((asset: { name: string }) => asset.name.endsWith('.apk'));
-          if (apkAsset) {
-            setAndroidApkUrl(apkAsset.browser_download_url);
-          }
-        }
-      } catch (err) {
-        console.log('[Auth] Could not fetch latest release:', err);
-      }
-    };
-    fetchLatestRelease();
-  }, []);
+
 
   const toggleMode = () => {
     console.log(`[Auth] Switching mode to: ${mode === 'LOGIN' ? 'SIGNUP' : 'LOGIN'}`);
@@ -169,27 +151,7 @@ export default function AuthForm() {
   return (
     <>
       {/* Android App Download Banner */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2 px-4 flex items-center justify-center gap-3 text-sm">
-        <Smartphone className="w-4 h-4" />
-        <span className="font-medium">Download our Android App!</span>
-        {androidApkUrl ? (
-          <a 
-            href={androidApkUrl} 
-            className="bg-white text-green-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-green-50 transition-colors"
-          >
-            <Download className="w-3 h-3" /> Get APK
-          </a>
-        ) : (
-          <a 
-            href="https://github.com/yashasvi9199/MatchFind/releases" 
-            target="_blank"
-            rel="noreferrer"
-            className="bg-white text-green-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-green-50 transition-colors"
-          >
-            <Download className="w-3 h-3" /> Get APK
-          </a>
-        )}
-      </div>
+      <AppDownloadModal />
 
       <div className="min-h-screen flex flex-col md:flex-row bg-white font-sans overflow-hidden">
         

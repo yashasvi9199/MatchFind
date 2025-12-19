@@ -2,6 +2,11 @@
 
 # version 2.0
 
+## 2.0.7
+
+- feature: Replaced static Android download banner with a premium "Get App" popup modal.
+- feature: "Get App" modal auto-appears on load (desktop & mobile) and fetches latest APK from GitHub.
+
 ## 2.0.6
 
 - feature: Enhanced Profile UI with optimized layout (Health & Lifestyle section repositioned).
