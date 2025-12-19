@@ -49,14 +49,14 @@ export default function FloatingNav({ currentView, setView, isProfileComplete, o
             <button
               key={item.id}
               onClick={() => handleNav(item.id as AppView)}
-              className={`flex items-center gap-3 group transition-transform duration-300 ${active ? 'scale-110' : ''}`}
+              className={`group transition-transform duration-300 ${active ? 'scale-110' : ''}`}
               style={{ transitionDelay: `${index * 50}ms` }}
             >
-              <span className={`bg-white text-gray-700 text-xs font-bold px-2 py-1 rounded-md shadow-md whitespace-nowrap ${active ? 'ring-2 ring-rose-300' : ''}`}>
-                {item.label}
-              </span>
-              <div className={`${item.color} text-white p-3 rounded-full shadow-lg hover:scale-110 transition-transform ${active ? 'ring-4 ring-white ring-opacity-50' : ''}`}>
+              <div className={`${item.color} text-white p-3 pt-2 pb-4 rounded-2xl shadow-lg hover:scale-110 transition-transform relative flex flex-col items-center ${active ? 'ring-4 ring-white ring-opacity-50' : ''}`}>
                 {item.icon}
+                <span className="text-[9px] font-bold mt-0.5 uppercase tracking-wide opacity-90">
+                  {item.label}
+                </span>
               </div>
             </button>
           );
