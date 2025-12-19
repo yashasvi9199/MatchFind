@@ -12,6 +12,7 @@
 - Floating navigation bar (Profile → Rishtey → Search → Matches)
 - Always-visible labels on navigation buttons
 - Dashboard with MatchView, RishteyView, and SearchView
+- Animated "Finding Rishtey..." spinner during discovery
 - Responsive mobile layout
 
 ## Profile Management
@@ -22,6 +23,8 @@
 - Circular profile pictures with fallback avatar
 - Image pop-out viewer for high-resolution profile pictures
 - Full Profile View for potential matches
+- Partial field editing with "square-pen" shortcut icons
+- Integrated "Complete Profile" restriction for partial edits
 
 ## Education & Career
 

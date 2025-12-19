@@ -2,6 +2,13 @@
 
 # version 2.0
 
+## 2.0.4
+
+- feature: Custom "Wave" Spinner in RishteyView with 2s minimum duration for smooth UX
+- feature: Partial profile editing UI with "square-pen" icons in ProfileView
+- feature: Partial edit modal with logic-based redirection to editor steps
+- fix: Integrated isProfileComplete check and IncompleteProfileModal into partial editing flow
+
 ## 2.0.3
 
 - feature: Full Profile View with dedicated page for potential matches
