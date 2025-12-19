@@ -24,6 +24,7 @@ import ProfileView from './profile/ProfileView';
 import RishteyView from './views/RishteyView';
 import MatchView from './views/MatchView';
 import SearchView from './views/SearchView';
+import FullProfileView from './views/FullProfileView';
 import FloatingNav from './navigation/FloatingNav';
 import IncompleteProfileModal from './common/IncompleteProfileModal';
 
@@ -92,6 +93,14 @@ export default function Dashboard({ user }: DashboardProps) {
   // Admin Validation Override Modal
   const [showAdminValidationModal, setShowAdminValidationModal] = useState(false);
   const [pendingValidationErrors, setPendingValidationErrors] = useState<ValidationError[]>([]);
+
+  // Full Profile View State
+  const [fullProfileUser, setFullProfileUser] = useState<UserProfile | null>(null);
+
+  const handleViewFullProfile = (profile: UserProfile) => {
+      setFullProfileUser(profile);
+      setCurrentView('FULL_PROFILE');
+  };
 
   // --- Effects ---
   useEffect(() => {
@@ -235,7 +244,18 @@ export default function Dashboard({ user }: DashboardProps) {
             req('currentCountry', 'Current country is required');
             req('currentCity', 'Current city is required');
             break;
-        case 3: req('educationLevel', 'Education level is required'); req('occupation', 'Occupation is required'); req('salary', 'Salary range is required'); break;
+        case 3: 
+            req('educationLevel', 'Education level is required');
+            req('occupation_type', 'Occupation type is required');
+            if (d.occupation_type === 'Job') {
+                req('company_name', 'Company name is required');
+                req('designation', 'Designation is required');
+            } else if (d.occupation_type === 'Business') {
+                req('business_name', 'Business name is required');
+                req('business_category', 'Business category is required');
+            }
+            req('salary', 'Salary range is required');
+            break;
         case 4: 
             if (!d.father.name) errs.push({ field: 'father.name', message: "Father's name is required" });
             if (!d.father.occupation) errs.push({ field: 'father.occupation', message: "Father's occupation is required" });
@@ -368,7 +388,7 @@ export default function Dashboard({ user }: DashboardProps) {
       case 4: return <Step5_Family data={formData} updateFamily={updateFamily} siblings={formData.siblings} setSiblings={setSiblings} editingSiblingIndex={editingSiblingIndex} setEditingSiblingIndex={setEditingSiblingIndex} />;
       case 5: return <Step6_Health data={formData} setHealthIssues={(val) => setFormData({...formData, healthIssues: val})} />;
       case 6: return <Step7_Preferences {...commonProps} setExpectations={(val) => setFormData({...formData, expectations: val})} />;
-      case 7: return <Step8_Media {...commonProps} avatarFile={avatarFile} setAvatarFile={setAvatarFile} />;
+      case 7: return <Step8_Media {...commonProps} avatarFile={avatarFile} setAvatarFile={setAvatarFile} avatarUrl={avatarUrl} />;
       default: return null;
     }
   };
@@ -535,7 +555,8 @@ export default function Dashboard({ user }: DashboardProps) {
     // Pass callback to restricted views
     const commonViewProps = {
         isProfileComplete,
-        onRestrictedAction: handleRestrictedAction
+        onRestrictedAction: handleRestrictedAction,
+        onViewFullProfile: handleViewFullProfile
     };
 
     switch(currentView) {
@@ -543,6 +564,7 @@ export default function Dashboard({ user }: DashboardProps) {
         case 'RISHTEY': return <RishteyView currentUser={userProfile} onEditProfile={handleEditProfile} {...commonViewProps} />;
         case 'MATCH': return <MatchView currentUser={userProfile} {...commonViewProps} />;
         case 'SEARCH': return <SearchView currentUser={userProfile} />; 
+        case 'FULL_PROFILE': return fullProfileUser ? <FullProfileView profile={fullProfileUser} onBack={() => setCurrentView('RISHTEY')} /> : null; // Default back to Rishtey for now, or track previous view
         default: return null;
     }
   };
