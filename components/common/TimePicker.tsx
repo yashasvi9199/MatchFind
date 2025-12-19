@@ -14,13 +14,21 @@ export default function TimePicker({ value, onChange }: TimePickerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const parseTime = (timeStr: string) => {
+    // Check if format is "HH:mm AM/PM" or "HH:mm" (24h)
+    if (timeStr && (timeStr.includes('AM') || timeStr.includes('PM'))) {
+        const [time, p] = timeStr.split(' ');
+        const [h, m] = time.split(':').map(Number);
+        return { hour12: h, minute: m, period: p };
+    }
+
+    // Fallback for 24h format (legacy data)
     const [h, m] = timeStr.split(':').map(Number);
     const period = h >= 12 ? 'PM' : 'AM';
     const hour12 = h % 12 || 12;
     return { hour12, minute: m, period };
   };
 
-  const { hour12, minute, period } = parseTime(value || '12:00');
+  const { hour12, minute, period } = parseTime(value || '12:00 PM');
 
   // Sync temp state when opening
   useEffect(() => {
@@ -32,12 +40,10 @@ export default function TimePicker({ value, onChange }: TimePickerProps) {
   }, [isOpen, hour12, minute, period]);
 
   const handleSave = () => {
-    let h24 = tempHour;
-    if (tempPeriod === 'PM' && tempHour !== 12) h24 += 12;
-    if (tempPeriod === 'AM' && tempHour === 12) h24 = 0;
-    const timeStr = `${h24.toString().padStart(2, '0')}:${tempMinute.toString().padStart(2, '0')}`;
+    // Return "hh:mm AA" format directly
+    const timeStr = `${tempHour.toString().padStart(2, '0')}:${tempMinute.toString().padStart(2, '0')} ${tempPeriod}`;
     
-    console.log(`[TimePicker] Time saved: ${timeStr} (${tempHour}:${tempMinute} ${tempPeriod})`);
+    console.log(`[TimePicker] Time saved: ${timeStr}`);
     onChange(timeStr);
     setIsOpen(false);
   };
