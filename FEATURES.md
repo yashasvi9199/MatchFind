@@ -5,6 +5,7 @@
 - Supabase integration for signup/login
 - Email confirmation redirect logic
 - Admin skip auth for convenience
+- Android App Download banner on Login page
 
 ## Dashboard & Navigation
 
@@ -19,6 +20,8 @@
 - Height input auto-formatting (x.y to x.0y)
 - Profile page displays all details (email, phone, education, location, family)
 - Circular profile pictures with fallback avatar
+- Image pop-out viewer for high-resolution profile pictures
+- Full Profile View for potential matches
 
 ## Education & Career
 
@@ -30,7 +33,7 @@
 ## Form Components
 
 - Autocomplete with keyboard navigation (Tab/Arrow keys)
-- TimePicker with explicit Save button
+- TimePicker with AM/PM support and explicit Save button
 - Searchable state selection for Indian states
 - Title Case formatting for name inputs
 
