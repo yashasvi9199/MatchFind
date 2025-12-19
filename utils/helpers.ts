@@ -11,6 +11,26 @@ export const sanitizeInput = (input: string | number): string => {
     .trim();
 };
 
+// Title Case: Capitalizes first letter of each word, preserves trailing spaces
+// Fixes space key not registering issue by not modifying trailing whitespace
+export const toTitleCasePreserveSpaces = (str: string): string => {
+  if (!str) return '';
+  // Allow only alphabets and spaces
+  const cleaned = str.replace(/[^a-zA-Z\s]/g, '');
+  // Split by space boundaries but preserve empty strings for multiple spaces
+  return cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+// Bio Case: Lowercase except first character of each word (after space or start)
+// Preserves spaces and allows punctuation for bio text
+export const toBioCase = (str: string): string => {
+  if (!str) return '';
+  // Convert entire string to lowercase first
+  const lower = str.toLowerCase();
+  // Capitalize first char of each word (after space or at start)
+  return lower.replace(/(^|\s)(\w)/g, (match, space, char) => space + char.toUpperCase());
+};
+
 // Image Compression Utility
 export const compressImage = async (file: File, maxWidth = 800, quality = 0.7): Promise<Blob> => {
   return new Promise((resolve, reject) => {
