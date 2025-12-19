@@ -2,15 +2,17 @@ import { useRef, ChangeEvent } from 'react';
 import { ProfileData } from '../../types';
 import { Label, SectionTitle } from '../common/FormComponents';
 import { Upload, Users, ExternalLink } from 'lucide-react';
+import { toBioCase } from '../../utils/helpers';
 
 interface Props {
   data: ProfileData;
   update: (field: keyof ProfileData, value: string) => void;
   avatarFile: File | null;
   setAvatarFile: (file: File | null) => void;
+  avatarUrl?: string | null; // Existing avatar URL for edit mode
 }
 
-export default function Step8_Media({ data, update, avatarFile, setAvatarFile }: Props) {
+export default function Step8_Media({ data, update, avatarFile, setAvatarFile, avatarUrl }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -19,6 +21,14 @@ export default function Step8_Media({ data, update, avatarFile, setAvatarFile }:
       setAvatarFile(e.target.files[0]);
     }
   };
+
+  const handleBioChange = (val: string) => {
+    // Apply bio case: lowercase except first char of each word
+    update('bio', toBioCase(val));
+  };
+
+  // Determine what image to show: new file takes priority, then existing URL
+  const displayImage = avatarFile ? URL.createObjectURL(avatarFile) : avatarUrl;
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -29,7 +39,7 @@ export default function Step8_Media({ data, update, avatarFile, setAvatarFile }:
           <textarea 
               className="w-full rounded-xl border border-gray-200 p-3 text-sm transition-all focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 bg-white shadow-sm h-32 resize-none" 
               value={data.bio} 
-              onChange={e => update('bio', e.target.value)} 
+              onChange={e => handleBioChange(e.target.value)} 
               placeholder="Tell us about yourself, hobbies, and personality..." 
           />
       </div>
@@ -49,10 +59,10 @@ export default function Step8_Media({ data, update, avatarFile, setAvatarFile }:
             className="hidden" 
           />
           
-          {avatarFile ? (
+          {displayImage ? (
             <>
               <img 
-                src={URL.createObjectURL(avatarFile)} 
+                src={displayImage} 
                 alt="Preview" 
                 className="h-full w-full object-contain"
               />
