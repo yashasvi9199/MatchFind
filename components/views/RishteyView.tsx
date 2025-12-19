@@ -128,21 +128,29 @@ export default function RishteyView({ currentUser, onEditProfile, isProfileCompl
         {/* Grid */}
         {filteredProfiles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProfiles.map(profile => (
+            {filteredProfiles.map(profile => {
+                // Use fallback avatar if none provided
+                const avatarSrc = profile.avatar_url || '/components/profile/avatar.png';
+                return (
                 <div key={profile.id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group relative cursor-pointer" onClick={() => setSelectedProfile(profile)}>
-                <div className="h-64 relative overflow-hidden">
-                    <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-4">
-                        <span className="text-white font-bold text-sm bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">View Details</span>
+                <div className="p-6 flex flex-col items-center">
+                    {/* Circular Profile Image */}
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-rose-100 shadow-lg mb-4 group-hover:border-rose-300 transition-colors">
+                        <img 
+                          src={avatarSrc} 
+                          alt={profile.name} 
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(profile.name || 'User');
+                          }}
+                        />
                     </div>
-                </div>
-                <div className="p-5">
-                    <h3 className="font-bold text-lg text-gray-800">{profile.title} {profile.name}</h3>
-                    <p className="text-sm text-gray-500 mb-3">{profile.age} Yrs • {profile.caste}</p>
-                    <p className="text-xs text-gray-400 line-clamp-2">{profile.bio}</p>
+                    <h3 className="font-bold text-lg text-gray-800 text-center">{profile.title} {profile.name}</h3>
+                    <p className="text-sm text-gray-500 mb-2">{profile.age} Yrs • {profile.caste}</p>
+                    <p className="text-xs text-gray-400 line-clamp-2 text-center">{profile.bio}</p>
                 </div>
                 
-                {/* Quick Actions (Stop Propagation to avoid opening modal when clicking buttons) */}
+                {/* Quick Actions */}
                 <div className="border-t border-gray-100 divide-x divide-gray-100 flex">
                     <button 
                         onClick={(e) => { e.stopPropagation(); handleAction(profile, 'REMOVED'); }}
@@ -168,7 +176,8 @@ export default function RishteyView({ currentUser, onEditProfile, isProfileCompl
                     </button>
                 </div>
                 </div>
-            ))}
+              );
+            })}
             </div>
         ) : (
             <div className="text-center py-20 text-gray-400">
