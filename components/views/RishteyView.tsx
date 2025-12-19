@@ -28,14 +28,28 @@ export default function RishteyView({ currentUser, onEditProfile, isProfileCompl
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isAdmin = currentUser.role === 'admin';
 
   useEffect(() => {
     // Load potential matches on mount
     const fetchPotentials = async () => {
-        const potentials = await getPotentialMatches(currentUser.id, currentUser.gender);
-        setProfiles(potentials);
+        setIsLoading(true);
+        const startTime = Date.now();
+        
+        try {
+            const potentials = await getPotentialMatches(currentUser.id, currentUser.gender);
+            setProfiles(potentials);
+        } catch (error) {
+            console.error("Error fetching potentials:", error);
+        } finally {
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, 2000 - elapsedTime);
+            setTimeout(() => {
+                setIsLoading(false);
+            }, remainingTime);
+        }
     };
     fetchPotentials();
   }, [currentUser.id, currentUser.gender]);
@@ -127,7 +141,20 @@ export default function RishteyView({ currentUser, onEditProfile, isProfileCompl
         )}
 
         {/* Grid */}
-        {filteredProfiles.length > 0 ? (
+        {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
+                <div className="flex items-center gap-2 h-16 mb-6">
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave [animation-delay:-0.45s]"></div>
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave [animation-delay:-0.3s]"></div>
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave [animation-delay:-0.15s]"></div>
+                    <div className="w-3 bg-rose-500 rounded-full animate-wave"></div>
+                </div>
+                <div className="space-y-2 text-center">
+                    <p className="text-gray-800 font-extrabold text-xl tracking-tight">Finding Rishtey...</p>
+                    <p className="text-gray-400 text-sm animate-pulse">Matching profiles based on your preferences</p>
+                </div>
+            </div>
+        ) : filteredProfiles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProfiles.map(profile => {
                 // Use fallback avatar if none provided

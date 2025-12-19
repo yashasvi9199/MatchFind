@@ -47,3 +47,20 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #cbd5e1;
 }
+/* Spinner Wave Animation */
+.animate-wave {
+  animation: wave 1.2s infinite ease-in-out;
+}
+
+@keyframes wave {
+  0%,
+  40%,
+  100% {
+    height: 20px;
+    opacity: 0.5;
+  }
+  20% {
+    height: 48px;
+    opacity: 1;
+  }
+}
