@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ProfileData } from '../../types';
 import { INDIAN_STATES } from '../../constants/data';
-import { Input, Select, Label, SectionTitle } from '../common/FormComponents';
+import { Input, Label, SectionTitle } from '../common/FormComponents';
+import Autocomplete from '../common/Autocomplete';
 import TimePicker from '../common/TimePicker';
 import { Clock, MapPin, Briefcase } from 'lucide-react';
 
@@ -23,8 +24,8 @@ export default function Step3_Location({ data, update }: Props) {
     }
   }, [sameAsNative, data.nativeCountry, data.nativeState, data.nativeCity, update]); 
 
-  const isIndiaNative = data.nativeCountry === 'India';
-  const isIndiaCurrent = data.currentCountry === 'India';
+  const isIndiaNative = data.nativeCountry?.toUpperCase() === 'INDIA';
+  const isIndiaCurrent = data.currentCountry?.toUpperCase() === 'INDIA';
 
   // Helper for Alphabets Only + Uppercase
   const handleAlphaInput = (field: keyof ProfileData, val: string) => {
@@ -55,22 +56,28 @@ export default function Step3_Location({ data, update }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
            <div>
               <Label>Country</Label>
-              <Input value={data.nativeCountry} onChange={e => handleAlphaInput('nativeCountry', e.target.value)} placeholder="India" />
+              <Input 
+                value={data.nativeCountry} 
+                onChange={e => handleAlphaInput('nativeCountry', e.target.value)} 
+                placeholder="e.g. INDIA" 
+              />
            </div>
            <div>
               <Label>State</Label>
               {isIndiaNative ? (
-                 <Select value={data.nativeState} onChange={e => update('nativeState', e.target.value)}>
-                    <option value="">-- Select --</option>
-                    {INDIAN_STATES.map(st => <option key={st} value={st}>{st}</option>)}
-                 </Select>
+                 <Autocomplete
+                    value={data.nativeState}
+                    onChange={val => update('nativeState', val)}
+                    options={INDIAN_STATES}
+                    placeholder="Type or select state..."
+                 />
               ) : (
-                 <Input value={data.nativeState} onChange={e => handleAlphaInput('nativeState', e.target.value)} />
+                 <Input value={data.nativeState} onChange={e => handleAlphaInput('nativeState', e.target.value)} placeholder="State/Province" />
               )}
            </div>
            <div>
               <Label>City</Label>
-              <Input value={data.nativeCity} onChange={e => handleAlphaInput('nativeCity', e.target.value)} />
+              <Input value={data.nativeCity} onChange={e => handleAlphaInput('nativeCity', e.target.value)} placeholder="City name" />
            </div>
         </div>
       </div>
@@ -91,21 +98,25 @@ export default function Step3_Location({ data, update }: Props) {
               <Input 
                 value={data.currentCountry} 
                 onChange={e => handleAlphaInput('currentCountry', e.target.value)} 
-                placeholder="India" 
+                placeholder="e.g. INDIA" 
                 disabled={sameAsNative}
               />
            </div>
            <div>
               <Label>State</Label>
               {isIndiaCurrent && !sameAsNative ? (
-                 <Select value={data.currentState} onChange={e => update('currentState', e.target.value)}>
-                    <option value="">-- Select --</option>
-                    {INDIAN_STATES.map(st => <option key={st} value={st}>{st}</option>)}
-                 </Select>
+                 <Autocomplete
+                    value={data.currentState}
+                    onChange={val => update('currentState', val)}
+                    options={INDIAN_STATES}
+                    placeholder="Type or select state..."
+                    disabled={sameAsNative}
+                 />
               ) : (
                  <Input 
                    value={data.currentState} 
                    onChange={e => handleAlphaInput('currentState', e.target.value)} 
+                   placeholder="State/Province"
                    disabled={sameAsNative}
                  />
               )}
@@ -115,6 +126,7 @@ export default function Step3_Location({ data, update }: Props) {
               <Input 
                 value={data.currentCity} 
                 onChange={e => handleAlphaInput('currentCity', e.target.value)} 
+                placeholder="City name"
                 disabled={sameAsNative}
               />
            </div>
