@@ -2,6 +2,16 @@
 
 # version 2.0
 
+## 2.0.3
+
+- feature: Full Profile View with dedicated page for potential matches
+- feature: Image pop-out modality for profile pictures
+- feature: AM/PM format support in TimePicker and profile display
+- feature: Android App Download banner on Auth page with release link
+- fix: Title case and text input handling across all form steps
+- fix: Removed blocking validation for occupation field
+- change: Updated floating navigation with bottom labels and improved icons (Height, Location)
+
 ## 2.0.2
 
 - fix: Mobile login/signup page 3-second lag by initializing isMobile state synchronously
