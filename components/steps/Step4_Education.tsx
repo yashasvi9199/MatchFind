@@ -13,9 +13,11 @@ export default function Step4_Education({ data, update }: Props) {
   const needsStream = ['Graduate', 'Post Graduate', 'Professional', 'Doctorate'].includes(data.educationLevel);
 
   const handleTextInput = (field: keyof ProfileData, val: string) => {
-    // Alphabets and Dot only, Uppercase
-    const clean = val.replace(/[^a-zA-Z.\s]/g, '').toUpperCase();
-    update(field, clean);
+    // Alphabets and spaces only, Title Case (first letter of each word capitalized)
+    const clean = val.replace(/[^a-zA-Z.\s]/g, '');
+    // Apply title case: capitalize first letter of each word
+    const titleCase = clean.replace(/\b\w/g, (char) => char.toUpperCase());
+    update(field, titleCase);
   };
 
   const handleOccupationTypeChange = (type: 'Job' | 'Business') => {
