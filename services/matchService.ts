@@ -47,6 +47,13 @@ export const getMutualMatches = async (currentUserId: string): Promise<UserProfi
     } catch { return []; }
 };
 
+export const getRejectedProfiles = async (currentUserId: string): Promise<UserProfile[]> => {
+    try {
+        const res = await fetch(`${API_URL}/api/matches/rejected?userId=${currentUserId}`, { credentials: 'omit' });
+        return await res.json();
+    } catch { return []; }
+};
+
 // Seed is now server-side, but client might trigger it if we wanted to exposed it. 
 // For now, removing the client-side seed logic as it's no longer relevant to local storage.
 export const seedMockInteractions = async (_currentUserId: string, _gender: 'Male' | 'Female') => {
