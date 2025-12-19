@@ -18,6 +18,8 @@ export interface ProfileData {
   bloodGroup: string;
   diet: 'Vegetarian' | 'Jain' | 'Non-Vegetarian' | 'Vegan';
   bio: string;
+  email?: string;
+  phone?: string;
 
   // Social & Religious
   caste: string;
@@ -88,7 +90,7 @@ export interface AuthSession {
   };
 }
 
-export type AppView = 'PROFILE' | 'RISHTEY' | 'SEARCH' | 'MATCH';
+export type AppView = 'PROFILE' | 'RISHTEY' | 'SEARCH' | 'MATCH' | 'FULL_PROFILE';
 
 export interface Interaction {
   fromUserId: string;
