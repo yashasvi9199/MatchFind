@@ -20,17 +20,17 @@ export default function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   
-  // Mobile Detection
-  const [isMobile, setIsMobile] = useState(false);
+  // Mobile Detection - initialize synchronously to prevent animation flash
+  const getIsMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(getIsMobile);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const toggleMode = () => {
