@@ -1,278 +1,334 @@
 import { useState } from 'react';
 import { ProfileData } from '../../types';
-import { User as UserIcon, MapPinHouse, Calendar, Heart, LogOut, Mail, Phone, MoveVertical, Briefcase, GraduationCap, Building2, Store, Utensils, Droplet, Users, ZoomIn, X, SquarePen } from 'lucide-react';
+import { User as UserIcon, MapPinHouse, Heart, LogOut, Mail, Phone, Briefcase, GraduationCap, Activity, Users, Star, X, SquarePen } from 'lucide-react';
 
 interface Props {
   data: ProfileData;
   avatarUrl: string | null;
   avatarFile: File | null;
-  onEdit: () => void;
+  onEdit: (stepIndex?: number) => void;
   onLogout: () => void;
   isProfileComplete?: boolean;
   onRestrictedAction?: () => void;
 }
 
+// Helper to standardizing empty values
+const val = (v: string | number | undefined) => v || <span className="text-gray-300 italic">Not Specified</span>;
+
+// Reusable Detail Row Component
+const DetailRow = ({ label, value, icon: Icon }: { label: string, value: React.ReactNode, icon?: React.ElementType }) => (
+  <div className="flex items-start justify-between group py-2 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors rounded-lg px-2 -mx-2">
+     <div className="flex items-center gap-2 text-gray-500 font-medium text-sm">
+        {Icon && <Icon className="w-4 h-4 text-rose-300" />}
+        <span>{label}</span>
+     </div>
+     <span className="text-gray-800 font-semibold text-sm text-right max-w-[60%]">{value}</span>
+  </div>
+);
+
+interface SectionCardProps {
+    title: string;
+    icon: React.ElementType;
+    onEditClick: () => void;
+    children: React.ReactNode;
+    accent?: "rose" | "orange" | "blue" | "emerald" | "purple";
+    className?: string;
+}
+
+// Reusable Section Card
+const SectionCard = ({ title, icon: Icon, onEditClick, children, accent = "rose", className = "" }: SectionCardProps) => {
+    const colors: Record<string, string> = {
+        rose: "bg-rose-50 text-rose-600 border-rose-100",
+        orange: "bg-orange-50 text-orange-600 border-orange-100",
+        blue: "bg-blue-50 text-blue-600 border-blue-100",
+        emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+        purple: "bg-purple-50 text-purple-600 border-purple-100"
+    };
+
+    return (
+      <div className={`bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative group hover:shadow-md transition-all duration-300 ${className}`}>
+          <button 
+              onClick={onEditClick} 
+              className="absolute top-4 right-4 text-gray-300 hover:text-rose-500 p-2 rounded-full hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100"
+              title="Edit Section"
+          >
+              <SquarePen className="w-5 h-5" />
+          </button> 
+          
+          <div className="flex items-center gap-3 mb-6">
+              <div className={`p-2.5 rounded-2xl ${colors[accent]}`}>
+                  <Icon className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 tracking-tight">{title}</h3>
+          </div>
+          <div className="space-y-1">
+              {children}
+          </div>
+      </div>
+    );
+};
+
 export default function ProfileView({ data, avatarUrl, avatarFile, onEdit, onLogout, isProfileComplete = true, onRestrictedAction }: Props) {
   const displayImage = avatarUrl || (avatarFile ? URL.createObjectURL(avatarFile) : null);
   const [showImageModal, setShowImageModal] = useState(false);
-  const [editingField, setEditingField] = useState<{label: string, field: keyof ProfileData} | null>(null);
 
-  const handlePartialEdit = (label: string, field: keyof ProfileData) => {
+  const handlePartialEdit = (stepIndex: number) => {
     if (!isProfileComplete && onRestrictedAction) {
         onRestrictedAction();
         return;
     }
-    setEditingField({ label, field });
+    onEdit(stepIndex);
   };
 
-  // Build occupation display string
-  const getOccupationDisplay = () => {
-    if (data.occupation_type === 'Job') {
-      return `${data.designation || 'Employee'} at ${data.company_name || 'Company'}`;
-    } else if (data.occupation_type === 'Business') {
-      return `${data.business_name || 'Business'} (${data.business_category || 'Category'})`;
-    }
-    return data.occupation || 'Not specified';
-  };
+  const isMale = data.gender === 'Male';
+  const headerGradient = isMale 
+    ? "from-blue-400 via-blue-300 to-cyan-200" 
+    : "from-rose-400 via-rose-300 to-orange-200";
 
   return (
-    <div className="animate-fadeIn max-w-4xl mx-auto space-y-8">
-       {/* Image Pop-out Modal */}
+    <div className="animate-fadeIn max-w-6xl mx-auto pb-24 font-sans text-gray-600">
+       
+       {/* Image Modal */}
        {showImageModal && displayImage && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fadeIn" onClick={() => setShowImageModal(false)}>
-            <div className="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center">
-                <button 
+            <div className="max-w-4xl w-full flex flex-col items-center relative">
+                 <button 
                     onClick={() => setShowImageModal(false)}
-                    className="absolute -top-12 right-0 text-white hover:text-rose-400 transition-colors p-2"
+                    className="absolute top-4 right-4 text-white hover:text-rose-400 transition-colors p-2 z-50 bg-black/50 rounded-full"
                 >
                     <X className="w-8 h-8" />
                 </button>
                 <img 
                     src={displayImage} 
                     alt="Full Profile" 
-                    className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl border border-gray-800"
+                    className="max-h-[85vh] object-contain rounded-2xl shadow-2xl ring-4 ring-white/10"
                     onClick={e => e.stopPropagation()}
                 />
             </div>
         </div>
        )}
 
-       <div className="bg-gradient-to-br from-rose-50 via-white to-orange-50 rounded-3xl shadow-xl overflow-hidden border border-rose-100">
-          <div className="h-48 bg-gradient-to-r from-rose-400 to-orange-400 relative">
-             <div className="absolute -bottom-16 left-8 p-1 bg-white rounded-full shadow-lg group">
-                {displayImage ? (
-                   <div className="relative cursor-pointer" onClick={() => setShowImageModal(true)}>
-                       <img src={displayImage} className="w-32 h-32 rounded-full object-cover border-4 border-white transition-transform group-hover:scale-105" alt="Profile" />
-                       <div className="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                            <ZoomIn className="w-8 h-8 text-white sticky" />
-                       </div>
-                   </div>
-                ) : (
-                   <div className="w-32 h-32 rounded-full bg-rose-100 flex items-center justify-center border-4 border-white">
-                      <UserIcon className="w-12 h-12 text-rose-300" />
-                   </div>
-                )}
-             </div>
+       {/* --- HERO SECTION --- */}
+       <div className="relative mb-12">
+          {/* Background Gradient */}
+          <div className={`h-64 rounded-[3rem] bg-gradient-to-r ${headerGradient} overflow-hidden relative shadow-lg`}>
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+              <div className="absolute -bottom-24 -right-20 w-96 h-96 bg-white/20 rounded-full blur-3xl"></div>
           </div>
-          
-          <div className="pt-20 px-8 pb-8">
-             <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                <div className="w-full md:w-auto">
-                  <h1 className="text-3xl font-bold text-gray-800">{data.title} {data.name}</h1>
-                  <p className="text-rose-600 font-medium text-lg mt-1">{getOccupationDisplay()}</p>
-                   <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-500">
-                       <span className="flex items-center gap-1"><MapPinHouse className="w-4 h-4"/> {data.currentCity}, {data.currentCountry}</span>
-                       <span className="flex items-center gap-1"><Calendar className="w-4 h-4"/> {data.age} Years</span>
-                       <span className="flex items-center gap-1 cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Height', 'height')}>
-                          <MoveVertical className="w-4 h-4"/> {data.height} ft
-                          {isProfileComplete && <SquarePen className="w-3 h-3 ml-1 opacity-50" />}
-                       </span>
-                   </div>
-                </div>
-                <div className="flex flex-col gap-2 w-full md:w-auto relative z-20">
-                    <button onClick={onEdit} className="w-full md:w-auto bg-rose-50 text-rose-600 px-4 py-2 rounded-xl font-bold hover:bg-rose-100 transition-colors text-center">Edit Profile</button>
-                    <button onClick={onLogout} className="md:hidden flex items-center justify-center bg-gray-50 text-gray-600 px-4 py-2 rounded-xl font-bold hover:bg-gray-100 transition-colors w-full md:w-auto">
-                        <LogOut className="w-4 h-4 mr-2" /> Sign Out
-                    </button>
-                </div>
-             </div>
 
-             {/* Contact Info */}
-             <div className="mt-6 flex flex-wrap gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-2 text-sm cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Email', 'email')}>
-                   <Mail className="w-4 h-4 text-rose-500" />
-                   <span className="text-gray-600">{data.email || 'No email provided'}</span>
-                   {isProfileComplete && <SquarePen className="w-3 h-3 opacity-50" />}
-                </div>
-                <div className="flex items-center gap-2 text-sm cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Phone', 'phone')}>
-                   <Phone className="w-4 h-4 text-rose-500" />
-                   <span className="text-gray-600">{data.phone || 'No phone provided'}</span>
-                   {isProfileComplete && <SquarePen className="w-3 h-3 opacity-50" />}
-                </div>
-             </div>
+          <div className="px-8 md:px-12 flex flex-col md:flex-row items-center md:items-end gap-8 -mt-32 relative z-10">
+              {/* Profile Image */}
+              <div className="group relative shrink-0">
+                  <div className="w-48 h-48 rounded-full border-[6px] border-white shadow-2xl overflow-hidden bg-white relative">
+                      {displayImage ? (
+                          <img 
+                            src={displayImage} 
+                            onClick={() => setShowImageModal(true)}
+                            className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500" 
+                            alt="Profile" 
+                          />
+                      ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300">
+                             <UserIcon className="w-20 h-20" />
+                          </div>
+                      )}
+                  </div>
+                  <button 
+                    onClick={() => handlePartialEdit(7)}
+                    className="absolute bottom-2 right-2 bg-white text-gray-600 p-2.5 rounded-full shadow-lg border border-gray-100 hover:text-rose-600 transition-colors"
+                  >
+                     <SquarePen className="w-4 h-4" />
+                  </button>
+              </div>
 
-             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="md:col-span-2 space-y-8">
-                    <section>
-                       <h3 className="text-lg font-bold text-gray-800 mb-2 border-b border-rose-100 pb-2 flex items-center justify-between">
-                          About Me
-                          {isProfileComplete && <SquarePen className="w-4 h-4 text-rose-400 cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Bio', 'bio')} />}
-                       </h3>
-                       <p className="text-gray-600 leading-relaxed">{data.bio || "No bio provided."}</p>
-                    </section>
-
-                    {/* Basic Details */}
-                    <section>
-                       <h3 className="text-lg font-bold text-gray-800 mb-4 border-b border-rose-100 pb-2">Personal Details</h3>
-                       <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                          <div>
-                             <span className="text-gray-400 text-sm block">Caste / Gotra</span> 
-                             <span className="font-medium text-gray-800">{data.caste || 'N/A'} / {data.gotra || 'N/A'}</span>
-                          </div>
-                          <div><span className="text-gray-400 text-sm block">Gender</span> <span className="font-medium text-gray-800">{data.gender}</span></div>
-                          <div className="cursor-pointer group" onClick={() => handlePartialEdit('Height', 'height')}>
-                             <span className="text-gray-400 text-sm flex items-center gap-1 group-hover:text-rose-500 transition-colors">
-                                <MoveVertical className="w-3 h-3"/> Height {isProfileComplete && <SquarePen className="w-3 h-3 opacity-50" />}
-                             </span> 
-                             <span className="font-medium text-gray-800">{data.height} ft</span>
-                          </div>
-                          <div className="cursor-pointer group" onClick={() => handlePartialEdit('Weight', 'weight')}>
-                             <span className="text-gray-400 text-sm block group-hover:text-rose-500 transition-colors">
-                                Weight {isProfileComplete && <SquarePen className="w-3 h-3 opacity-50" />}
-                             </span> 
-                             <span className="font-medium text-gray-800">{data.weight} kg</span>
-                          </div>
-                          <div className="cursor-pointer group" onClick={() => handlePartialEdit('Blood Group', 'bloodGroup')}>
-                             <span className="text-gray-400 text-sm flex items-center gap-1 group-hover:text-rose-500 transition-colors">
-                                <Droplet className="w-3 h-3"/> Blood Group {isProfileComplete && <SquarePen className="w-3 h-3 opacity-50" />}
-                             </span> 
-                             <span className="font-medium text-gray-800">{data.bloodGroup || 'N/A'}</span>
-                          </div>
-                          <div className="cursor-pointer group" onClick={() => handlePartialEdit('Skin Color', 'skinColor')}>
-                             <span className="text-gray-400 text-sm block group-hover:text-rose-500 transition-colors">
-                                Skin Color {isProfileComplete && <SquarePen className="w-3 h-3 opacity-50" />}
-                             </span> 
-                             <span className="font-medium text-gray-800">{data.skinColor || 'N/A'}</span>
-                          </div>
-                          <div className="cursor-pointer group" onClick={() => handlePartialEdit('Diet', 'diet')}>
-                             <span className="text-gray-400 text-sm flex items-center gap-1 group-hover:text-rose-500 transition-colors">
-                                <Utensils className="w-3 h-3"/> Diet {isProfileComplete && <SquarePen className="w-3 h-3 opacity-50" />}
-                             </span> 
-                             <span className="font-medium text-gray-800">{data.diet}</span>
-                          </div>
-                       </div>
-                    </section>
-
-                    {/* Education & Career */}
-                    <section>
-                       <h3 className="text-lg font-bold text-gray-800 mb-4 border-b border-rose-100 pb-2 flex items-center justify-between">
-                          <span className="flex items-center gap-2"><GraduationCap className="w-5 h-5"/> Education & Career</span>
-                          {isProfileComplete && <SquarePen className="w-4 h-4 text-rose-400 cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Education & Career', 'occupation_type')} />}
-                       </h3>
-                       <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                          <div><span className="text-gray-400 text-sm block">Education Level</span> <span className="font-medium text-gray-800">{data.educationLevel || 'N/A'}</span></div>
-                          <div><span className="text-gray-400 text-sm block">Stream</span> <span className="font-medium text-gray-800">{data.educationStream || 'N/A'}</span></div>
-                          <div><span className="text-gray-400 text-sm block">Degree</span> <span className="font-medium text-gray-800">{data.educationDegree || 'N/A'}</span></div>
-                          <div><span className="text-gray-400 text-sm block">Occupation Type</span> <span className="font-medium text-gray-800">{data.occupation_type || 'N/A'}</span></div>
-                          {data.occupation_type === 'Job' && (
-                            <>
-                              <div><span className="text-gray-400 text-sm block flex items-center gap-1"><Building2 className="w-3 h-3"/> Company</span> <span className="font-medium text-gray-800">{data.company_name || 'N/A'}</span></div>
-                              <div><span className="text-gray-400 text-sm block">Designation</span> <span className="font-medium text-gray-800">{data.designation || 'N/A'}</span></div>
-                            </>
-                          )}
-                          {data.occupation_type === 'Business' && (
-                            <>
-                              <div><span className="text-gray-400 text-sm block flex items-center gap-1"><Store className="w-3 h-3"/> Business</span> <span className="font-medium text-gray-800">{data.business_name || 'N/A'}</span></div>
-                              <div><span className="text-gray-400 text-sm block">Category</span> <span className="font-medium text-gray-800">{data.business_category || 'N/A'}</span></div>
-                            </>
-                          )}
-                          <div><span className="text-gray-400 text-sm block">{data.occupation_type === 'Business' ? 'Turnover' : 'Salary'}</span> <span className="font-medium text-gray-800">{data.salary || 'N/A'}</span></div>
-                       </div>
-                    </section>
-
-                    {/* Location */}
-                    <section>
-                       <h3 className="text-lg font-bold text-gray-800 mb-4 border-b border-rose-100 pb-2 flex items-center justify-between">
-                          <span className="flex items-center gap-2"><MapPinHouse className="w-5 h-5"/> Location Details</span>
-                          {isProfileComplete && <SquarePen className="w-4 h-4 text-rose-400 cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Location', 'currentCity')} />}
-                       </h3>
-                       <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                          <div><span className="text-gray-400 text-sm block">Birth Place</span> <span className="font-medium text-gray-800">{data.birthPlace || 'N/A'}</span></div>
-                          <div><span className="text-gray-400 text-sm block">Birth Time</span> <span className="font-medium text-gray-800">{data.birthTime || 'N/A'}</span></div>
-                          <div><span className="text-gray-400 text-sm block">Native</span> <span className="font-medium text-gray-800">{data.nativeCity}, {data.nativeState}, {data.nativeCountry}</span></div>
-                          <div><span className="text-gray-400 text-sm block">Current</span> <span className="font-medium text-gray-800">{data.currentCity}, {data.currentState}, {data.currentCountry}</span></div>
-                       </div>
-                    </section>
-
-                     <section>
-                       <h3 className="text-lg font-bold text-gray-800 mb-4 border-b border-rose-100 pb-2 flex items-center justify-between">
-                          <span className="flex items-center gap-2"><Users className="w-5 h-5"/> Family Background</span>
-                          {isProfileComplete && <SquarePen className="w-4 h-4 text-rose-400 cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Family', 'father')} />}
-                       </h3>
-                       <div className="bg-orange-50/50 rounded-xl p-4 space-y-3">
-                          <p><span className="font-semibold text-gray-700">Father:</span> {data.father.title} {data.father.name} ({data.father.occupation})</p>
-                          <p><span className="font-semibold text-gray-700">Mother:</span> {data.mother.title} {data.mother.name} ({data.mother.occupation})</p>
-                          <p><span className="font-semibold text-gray-700">Maternal Side:</span> {data.paternalSide.caste} - {data.paternalSide.gotra}</p>
-                          <p><span className="font-semibold text-gray-700">Siblings:</span> {data.siblings.length > 0 ? `${data.siblings.length} siblings` : "None"}</p>
-                          {data.healthIssues.length > 0 && (
-                            <p><span className="font-semibold text-gray-700">Health Notes:</span> {data.healthIssues.join(', ')}</p>
-                          )}
-                       </div>
-                    </section>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="bg-white rounded-2xl shadow-sm border border-rose-100 p-6">
-                       <h3 className="font-bold text-rose-600 mb-4 flex items-center justify-between">
-                          <span className="flex items-center gap-2"><Heart className="w-5 h-5 fill-current"/> Partner Preference</span>
-                          {isProfileComplete && <SquarePen className="w-4 h-4 text-rose-400 cursor-pointer hover:text-rose-600 transition-colors" onClick={() => handlePartialEdit('Preferences', 'partnerAgeMin')} />}
-                       </h3>
-                       <div className="space-y-3">
-                          <div><span className="text-gray-400 text-xs uppercase font-bold">Age Range</span> <div className="font-medium">{data.partnerAgeMin} - {data.partnerAgeMax} Years</div></div>
-                          <div><span className="text-gray-400 text-xs uppercase font-bold">Expectations</span> 
-                             <ul className="mt-2 space-y-1">
-                                {data.expectations.map((ex, i) => <li key={i} className="text-sm text-gray-600 flex items-start gap-2"><div className="w-1.5 h-1.5 bg-rose-400 rounded-full mt-1.5 shrink-0"></div>{ex}</li>)}
-                                {data.expectations.length === 0 && <li className="text-sm text-gray-400 italic">None listed</li>}
-                             </ul>
-                          </div>
-                       </div>
-                    </div>
-                </div>
-             </div>
+              {/* Title & Headline */}
+              <div className="text-center md:text-left pb-4 mt-20 flex-grow">
+                  <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight font-serif mb-2">
+                    {data.title} {data.name}
+                  </h1>
+                  
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-600 mb-4">
+                      <span className="flex items-center gap-1.5 px-3 py-1 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-sm">
+                        <Star className="w-4 h-4 text-orange-400 fill-current" /> 
+                        <span className="font-semibold">{data.age} Years</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 px-3 py-1 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-sm">
+                        <MapPinHouse className="w-4 h-4 text-rose-400" />
+                        <span className="font-medium">{data.currentCity}, {data.currentCountry}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 px-3 py-1 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-sm">
+                         <Briefcase className="w-4 h-4 text-blue-400" />
+                         <span className="font-medium">{data.designation || 'Professional'}</span>
+                      </span>
+                  </div>
+              </div>
           </div>
        </div>
 
-       {/* Partial Edit Modal */}
-       {editingField && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-scaleIn">
-                <div className="bg-gradient-to-r from-rose-500 to-orange-500 px-6 py-4 flex justify-between items-center text-white">
-                    <h3 className="text-lg font-bold">Edit {editingField.label}</h3>
-                    <button onClick={() => setEditingField(null)} className="p-1 hover:bg-white/20 rounded-lg transition-colors">
-                        <X className="w-6 h-6" />
-                    </button>
-                </div>
-                <div className="p-6">
-                    <p className="text-gray-500 text-sm mb-4">You can edit your {editingField.label.toLowerCase()} here. For complex changes, please use the full "Edit Profile" button.</p>
-                    <div className="bg-rose-50 p-4 rounded-xl border border-rose-100 flex items-center justify-center text-center">
-                        <div>
-                            <p className="text-rose-600 font-bold mb-2">Redirect to Full Editor?</p>
-                            <p className="text-xs text-rose-400 mb-4">Partial editing is a shortcut to the relevant step in your profile wizard.</p>
-                            <button 
-                                onClick={() => {
-                                    setEditingField(null);
-                                    onEdit();
-                                }}
-                                className="w-full bg-rose-500 text-white font-bold py-2 rounded-lg shadow-lg shadow-rose-200 hover:bg-rose-600 transition-colors"
-                            >
-                                Go to {editingField.label} Editor
-                            </button>
+
+       {/* --- MAIN GRID LAYOUT --- */}
+       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-4">
+          
+          {/* LEFT COLUMN (Details) */}
+          <div className="lg:col-span-8 space-y-8">
+              
+              {/* About Me */}
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-2 h-full bg-rose-400"></div>
+                  <button onClick={() => handlePartialEdit(7)} className="absolute top-6 right-6 text-gray-300 hover:text-rose-500 transition-colors"><SquarePen className="w-5 h-5" /></button>
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 font-serif">About Me</h3>
+                  <p className="text-lg text-gray-600 leading-relaxed italic font-light relative z-10">
+                    "{data.bio || "No description provided yet."}"
+                  </p>
+              </div>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* Physical Traits */}
+                  <SectionCard title="Physical Appearance" icon={Activity} onEditClick={() => handlePartialEdit(0)}>
+                      <DetailRow label="Height" value={`${data.height} Ft`} />
+                      <DetailRow label="Weight" value={`${data.weight} Kg`} />
+                      <DetailRow label="Skin Tone" value={data.skinColor} />
+                      <DetailRow label="Diet" value={data.diet} />
+                      <DetailRow label="Blood Group" value={data.bloodGroup} />
+                  </SectionCard>
+
+                  {/* Religious Background */}
+                  <SectionCard title="Religious Background" icon={Star} onEditClick={() => handlePartialEdit(1)} accent="orange">
+                      <DetailRow label="Caste" value={data.caste} />
+                      <DetailRow label="Gotra" value={data.gotra} />
+                      <DetailRow label="Native State" value={data.nativeState} />
+                      <DetailRow label="Native City" value={data.nativeCity} />
+                      <DetailRow label="Birth Time" value={data.birthTime} />
+                  </SectionCard>
+
+                  {/* Education & Career */}
+                  <SectionCard title="Education & Career" icon={GraduationCap} onEditClick={() => handlePartialEdit(3)} accent="blue">
+                      <DetailRow label="Education" value={data.educationLevel} />
+                      <DetailRow label="Stream" value={data.educationStream} />
+                      <DetailRow label="Profession" value={data.occupation_type} />
+                      <DetailRow label="Details" value={data.designation || data.business_category} />
+                      <DetailRow label="Annual Income" value={data.salary} />
+                  </SectionCard>
+
+                  {/* Family Details */}
+                  <SectionCard title="Family Background" icon={Users} onEditClick={() => handlePartialEdit(4)} accent="emerald">
+                      <DetailRow label="Father" value={`${data.father.title} ${data.father.name}`} />
+                      <DetailRow label="Mother" value={`${data.mother.title} ${data.mother.name}`} />
+                      <DetailRow label="Siblings" value={`${data.siblings.length} Members`} />
+                      <DetailRow label="Nanihaal Gotra" value={data.paternalSide.gotra} />
+                  </SectionCard>
+
+
+              </div>
+          </div>
+
+
+          {/* RIGHT COLUMN (Preferences & Contact) */}
+          <div className="lg:col-span-4 space-y-8">
+              
+              {/* Partner Preferences (Highlighted) */}
+              <div className="bg-gradient-to-br from-rose-500 to-orange-400 rounded-3xl p-8 text-white shadow-xl shadow-rose-200 relative overflow-hidden group">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-3xl group-hover:bg-white/30 transition-colors"></div>
+                  
+                  <button onClick={() => handlePartialEdit(6)} className="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors border border-white/20">
+                      <SquarePen className="w-4 h-4 text-white" />
+                  </button>
+
+                  <div className="flex items-center gap-3 mb-8 relative z-10">
+                      <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md">
+                          <Heart className="w-6 h-6 fill-current" />
+                      </div>
+                      <h3 className="text-xl font-bold font-serif tracking-wide">Partner Choice</h3>
+                  </div>
+
+                  <div className="space-y-6 relative z-10">
+                      <div>
+                          <p className="text-rose-100 text-xs font-bold uppercase tracking-widest mb-1">Age Preference</p>
+                          <p className="text-3xl font-serif font-medium">{val(data.partnerAgeMin)} - {val(data.partnerAgeMax)} <span className="text-base opacity-70">Years</span></p>
+                      </div>
+                      <div>
+                          <p className="text-rose-100 text-xs font-bold uppercase tracking-widest mb-3">Key Expectations</p>
+                          {data.expectations.length > 0 ? (
+                              <ul className="space-y-3">
+                                  {data.expectations.slice(0, 5).map((exp, i) => (
+                                      <li key={i} className="flex items-start gap-3 text-sm font-medium text-white/90">
+                                          <span className="w-1.5 h-1.5 bg-white rounded-full mt-1.5 shrink-0 shadow-[0_0_5px_white]"></span>
+                                          {exp}
+                                      </li>
+                                  ))}
+                              </ul>
+                          ) : (
+                              <p className="text-white/60 italic text-sm">No specific preferences listed.</p>
+                          )}
+                      </div>
+                  </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                  <div className="flex justify-between items-center mb-6">
+                     <h3 className="text-lg font-bold text-gray-800 font-serif">Contact Details</h3>
+                     <button onClick={() => handlePartialEdit(2)} className="text-gray-300 hover:text-rose-500 transition-colors"><SquarePen className="w-4 h-4" /></button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                      <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors group/c">
+                          <div className="bg-white p-2.5 rounded-xl shadow-sm group-hover/c:scale-110 transition-transform">
+                              <Phone className="w-5 h-5 text-gray-600" />
+                          </div>
+                          <div className="min-w-0">
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Mobile</p>
+                              <p className="font-semibold text-gray-800 truncate">{val(data.phone)}</p>
+                          </div>
+                      </div>
+                      <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors group/c">
+                          <div className="bg-white p-2.5 rounded-xl shadow-sm group-hover/c:scale-110 transition-transform">
+                              <Mail className="w-5 h-5 text-gray-600" />
+                          </div>
+                          <div className="min-w-0">
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Email</p>
+                              <p className="font-semibold text-gray-800 truncate">{val(data.email)}</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              {/* Lifestyle/Health */}
+              <SectionCard title="Health & Lifestyle" icon={Activity} onEditClick={() => handlePartialEdit(5)} accent="purple">
+                  <div className="pt-2">
+                    {data.healthIssues.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                            {data.healthIssues.map((issue, i) => (
+                                <span key={i} className="px-3 py-1 bg-red-50 text-red-600 text-xs font-semibold rounded-full border border-red-100">{issue}</span>
+                            ))}
                         </div>
-                    </div>
-                </div>
+                    ) : (
+                        <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-2 rounded-xl text-sm font-medium">
+                            <Activity className="w-4 h-4" /> Healthy / No Major Issues
+                        </div>
+                    )}
+                  </div>
+              </SectionCard>
+
+              {/* Mobile Logout */}
+              <button 
+                onClick={onLogout} 
+                className="lg:hidden w-full py-4 bg-gray-100 text-gray-600 font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
+              >
+                  <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+          </div>
+       </div>
+
+       {/* Footer */}
+       <div className="text-center pt-16 pb-8 opacity-40 hover:opacity-100 transition-opacity duration-500">
+            <div className="flex items-center justify-center gap-2 mb-2">
+                <Heart className="w-4 h-4 text-rose-400 fill-current animate-pulse" />
+                <span className="font-serif italic text-gray-500">MatchFind Exclusive</span>
             </div>
-        </div>
-       )}
+       </div>
     </div>
   );
 }
