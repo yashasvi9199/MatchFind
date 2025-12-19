@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ProfileData } from '../../types';
 import { Input, Label, SectionTitle } from '../common/FormComponents';
 import { X, CheckCircle2 } from 'lucide-react';
+import { toTitleCasePreserveSpaces } from '../../utils/helpers';
 
 interface Props {
   data: ProfileData;
@@ -10,6 +11,11 @@ interface Props {
 
 export default function Step6_Health({ data, setHealthIssues }: Props) {
   const [newHealthIssue, setNewHealthIssue] = useState('');
+
+  const handleHealthIssueInput = (val: string) => {
+    // Apply title case while preserving trailing spaces
+    setNewHealthIssue(toTitleCasePreserveSpaces(val));
+  };
 
   const addHealthIssue = () => {
     const issue = newHealthIssue.trim().replace(/\s+/g, ' '); // Trim additional spaces
@@ -40,7 +46,7 @@ export default function Step6_Health({ data, setHealthIssues }: Props) {
           <div className="flex gap-2 mb-4">
             <Input 
               value={newHealthIssue} 
-              onChange={e => setNewHealthIssue(e.target.value)} 
+              onChange={e => handleHealthIssueInput(e.target.value)} 
               placeholder="E.g. Glasses, Asthma (Max 3 words)"
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addHealthIssue())}
             />
