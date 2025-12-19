@@ -11,6 +11,7 @@ interface Props {
   onEditProfile?: (profile: UserProfile) => void;
   isProfileComplete?: boolean;
   onRestrictedAction?: () => void;
+  onViewFullProfile?: (profile: UserProfile) => void;
 }
 
 const INITIAL_FILTERS: FilterState = {
@@ -22,7 +23,7 @@ const INITIAL_FILTERS: FilterState = {
   healthIssues: 'any',
 };
 
-export default function RishteyView({ currentUser, onEditProfile, isProfileComplete = true, onRestrictedAction }: Props) {
+export default function RishteyView({ currentUser, onEditProfile, isProfileComplete = true, onRestrictedAction, onViewFullProfile }: Props) {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
@@ -193,6 +194,7 @@ export default function RishteyView({ currentUser, onEditProfile, isProfileCompl
                 profile={selectedProfile} 
                 onClose={() => setSelectedProfile(null)} 
                 onAction={(type) => handleAction(selectedProfile, type)}
+                onViewFullProfile={() => onViewFullProfile?.(selectedProfile)}
             />
         )}
     </>
