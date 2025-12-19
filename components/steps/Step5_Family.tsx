@@ -4,7 +4,7 @@ import { TITLES, CASTES, GOTRA_MAP } from '../../constants/data';
 import { Input, Select, Label, SectionTitle } from '../common/FormComponents';
 import Autocomplete from '../common/Autocomplete';
 import { Users, Plus, Trash2, Check, Pencil, X } from 'lucide-react';
-import { sanitizeInput } from '../../utils/helpers';
+import { sanitizeInput, toTitleCasePreserveSpaces } from '../../utils/helpers';
 
 interface Props {
   data: ProfileData;
@@ -32,16 +32,13 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
     setEditingSiblingIndex(siblings.length);
   };
 
-  // Title Case Helper for siblings
-  const toTitleCaseSibling = (str: string) => {
-    return str.replace(/[^a-zA-Z\s]/g, '').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-  };
+  // Use shared utility for title case that preserves trailing spaces
 
   const updateSibling = (index: number, field: keyof FamilyMember, value: string) => {
     let sanitized = sanitizeInput(value);
     // Apply validation for Name and Occupation - use Title Case
     if (field === 'name' || field === 'occupation') {
-        sanitized = toTitleCaseSibling(sanitized);
+        sanitized = toTitleCasePreserveSpaces(sanitized);
     }
     const updated = [...siblings];
     updated[index] = { ...updated[index], [field]: sanitized };
@@ -62,13 +59,10 @@ export default function Step5_Family({ data, updateFamily, siblings, setSiblings
     setEditingSiblingIndex(null);
   };
 
-  // Title Case Helper: Capitalizes first letter of each word
-  const toTitleCase = (str: string) => {
-    return str.replace(/[^a-zA-Z\s]/g, '').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-  };
+  // Use shared utility for title case that preserves trailing spaces
 
   const handleFamilyText = (relation: 'father' | 'mother' | 'paternalSide', field: keyof FamilyMember, val: string) => {
-      const clean = toTitleCase(val);
+      const clean = toTitleCasePreserveSpaces(val);
       updateFamily(relation, field, clean);
   };
 
