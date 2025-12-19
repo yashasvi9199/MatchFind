@@ -2,6 +2,11 @@
 
 # version 2.0
 
+## 2.0.2
+
+- fix: Mobile login/signup page 3-second lag by initializing isMobile state synchronously
+- fix: Constant truthiness lint error on weight field in PublicProfileModal
+
 ## 2.0.1
 
 - feature: Add occupation_type field with Job/Business radio selection in Step4
