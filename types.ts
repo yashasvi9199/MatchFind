@@ -42,7 +42,12 @@ export interface ProfileData {
   educationStream: string;  // e.g., "Engineering"
   educationDegree: string;  // e.g., "B.Tech"
   education: string;        // Fallback/Legacy string
-  occupation: string;
+  occupation: string;       // Legacy field
+  occupation_type: 'Job' | 'Business' | '';
+  company_name: string;
+  designation: string;
+  business_name: string;
+  business_category: string;
   salary: string;
 
   // Family Details

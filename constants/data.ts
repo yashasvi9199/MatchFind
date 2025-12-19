@@ -52,7 +52,7 @@ export const DIETS = ['Vegetarian', 'Jain', 'Non-Vegetarian', 'Vegan'];
 export const SKINS = ['Fair', 'Wheatish', 'Dusky', 'Dark'];
 
 export const EDUCATION_LEVELS = ['10th Pass', '12th Pass', 'Graduate', 'Post Graduate', 'Professional', 'Doctorate', 'Other'];
-export const EDUCATION_STREAMS = ['Engineering', 'Medical', 'Arts', 'Commerce', 'Science', 'Law', 'Management', 'Design', 'Other'];
+export const EDUCATION_STREAMS = ['Engineering', 'Computer Science', 'Medical', 'Arts', 'Commerce', 'Science', 'Law', 'Management', 'Design', 'Other'];
 
 export const STEPS = [
   'Basic Info', 'Social & Religious', 'Location', 'Education & Career', 
