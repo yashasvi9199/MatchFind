@@ -1,5 +1,15 @@
 # CHANGELOG
 
+# version 2.1
+
+## 2.1.1
+
+- feature: Added in-app update checker for Android builds (checks GitHub Releases on app launch)
+- feature: APK download modal now hidden on Android native app (only shows on website)
+- feature: Added platform detection utility using Capacitor
+- feature: Android hardware back button navigation (Profile/Search/Match → Rishtey, closes modals)
+- change: Added version metadata to metadata.json for update comparison
+
 # version 2.0
 
 ## 2.0.8
