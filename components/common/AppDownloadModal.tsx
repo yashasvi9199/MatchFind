@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Smartphone, Download, X, Star, ShieldCheck } from 'lucide-react';
+import { isNativePlatform } from '../../utils/platform';
 
 export default function AppDownloadModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Check if running on native platform (hooks must be called first)
+  const isNative = isNativePlatform();
+
   useEffect(() => {
+    // Don't run any effects on native platform
+    if (isNative) return;
+
     // Show modal after a short delay
     const timer = setTimeout(() => setIsOpen(true), 1000);
 
@@ -30,9 +37,10 @@ export default function AppDownloadModal() {
     fetchLatestRelease();
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isNative]);
 
-  if (!isOpen) return null;
+  // Don't render on native platform
+  if (isNative || !isOpen) return null;
 
   const handleDownload = () => {
     if (downloadUrl) {
