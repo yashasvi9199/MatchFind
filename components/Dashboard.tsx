@@ -7,6 +7,7 @@ import { STEPS } from '../constants/data';
 import { LogOut, Heart, ArrowRight, Save, SkipForward, ArrowLeft, XCircle, AlertCircle } from 'lucide-react';
 import { seedMockInteractions } from '../services/matchService';
 import { sanitizeInput, toTitleCase, toBioCase } from '../utils/helpers';
+import { useAndroidBackButton } from '../utils/useAndroidBackButton';
 
 // Steps Components
 import Step0_Initial, { Step0Data } from './steps/Step0_Initial';
@@ -27,6 +28,7 @@ import SearchView from './views/SearchView';
 import FullProfileView from './views/FullProfileView';
 import FloatingNav from './navigation/FloatingNav';
 import IncompleteProfileModal from './common/IncompleteProfileModal';
+import InAppUpdateChecker from './common/InAppUpdateChecker';
 
 const INITIAL_FAMILY_MEMBER: FamilyMember = {
   title: 'Mr', name: '', gotra: '', caste: '', occupation: ''
@@ -138,6 +140,50 @@ export default function Dashboard({ user }: DashboardProps) {
       setHighestStepReached(currentStep);
     }
   }, [currentStep, highestStepReached]);
+
+  // --- Android Back Button Handler ---
+  const handleAndroidBack = useCallback((): boolean => {
+    // Priority 1: Close restriction modal
+    if (showRestrictionModal) {
+      setShowRestrictionModal(false);
+      return true;
+    }
+
+    // Priority 2: Close admin validation modal
+    if (showAdminValidationModal) {
+      setShowAdminValidationModal(false);
+      return true;
+    }
+
+    // Priority 3: Go back from Full Profile view to Rishtey
+    if (currentView === 'FULL_PROFILE') {
+      setFullProfileUser(null);
+      setCurrentView('RISHTEY');
+      return true;
+    }
+
+    // Priority 4: Cancel editing mode (go back to previous view)
+    if (isEditingProfile && hasProfile) {
+      setIsEditingProfile(false);
+      setCurrentView('RISHTEY');
+      return true;
+    }
+
+    // Priority 5: From Profile/Search/Match views, go back to Rishtey
+    if (currentView === 'PROFILE' || currentView === 'SEARCH' || currentView === 'MATCH') {
+      setCurrentView('RISHTEY');
+      return true;
+    }
+
+    // Priority 6: On Rishtey view, allow app to close (return false)
+    if (currentView === 'RISHTEY') {
+      return false; // Let app close
+    }
+
+    return false; // Default: allow app to close
+  }, [currentView, showRestrictionModal, showAdminValidationModal, isEditingProfile, hasProfile]);
+
+  useAndroidBackButton({ onBack: handleAndroidBack });
 
   // --- Handlers ---
 
@@ -616,7 +662,11 @@ export default function Dashboard({ user }: DashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 font-sans text-gray-800">
+    <>
+      {/* Android In-App Update Checker */}
+      <InAppUpdateChecker />
+      
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 font-sans text-gray-800">
       <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-rose-100 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
           <div className="flex items-center">
@@ -668,6 +718,7 @@ export default function Dashboard({ user }: DashboardProps) {
         .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
       `}</style>
     </div>
+    </>
   );
 }
 
